@@ -3,89 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel Pro</title>
+    <title>Travel Planner Expert</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vuedraggable/4.1.0/vuedraggable.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00C2DE; --bg: #F8F9FA; --card: #FFFFFF; --text: #333; }
-        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
+        :root { --primary: #00C2DE; --bg: #F0F2F5; --card: #FFFFFF; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); margin: 0; user-select: none; }
         
         /* Header & Tabs */
-        .header { background: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .day-tabs { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
-        .day-tab { padding: 8px 20px; border-radius: 20px; background: #eee; white-space: nowrap; font-size: 14px; cursor: pointer; }
+        .header { background: white; padding: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .day-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; align-items: center; }
+        .day-tab { padding: 8px 18px; border-radius: 12px; background: #E9ECEF; font-size: 14px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
         .day-tab.active { background: var(--primary); color: white; font-weight: bold; }
+        .btn-add-day { background: #34C759; color: white; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* Timeline Container */
-        .timeline { padding: 20px; position: relative; }
-        .timeline::before { content: ''; position: absolute; left: 30px; top: 0; bottom: 0; width: 2px; background: #E9ECEF; }
-
-        /* Card Style */
-        .event-card { position: relative; margin-bottom: 25px; padding-left: 40px; }
-        .event-dot { position: absolute; left: 7px; top: 5px; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; border: 3px solid white; z-index: 2; }
-        .event-time { font-size: 13px; color: #6C757D; margin-bottom: 5px; font-weight: bold; }
-        .card-content { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 5px; display: flex; justify-content: space-between; }
-        .card-note { font-size: 14px; color: #666; white-space: pre-wrap; }
-        .card-location { font-size: 12px; color: var(--primary); margin-top: 8px; text-decoration: none; display: block; }
-
-        /* Bottom Controls */
-        .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #EEE; display: flex; gap: 10px; }
-        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; text-align: center; }
-        .btn-add { background: var(--primary); color: white; }
-        .btn-save { background: #34C759; color: white; }
+        /* Timeline & Draggable */
+        .timeline { padding: 15px; position: relative; min-height: 300px; }
+        .timeline::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; width: 2px; background: #DDD; z-index: 0; }
+        
+        .event-card { position: relative; margin-bottom: 20px; padding-left: 35px; z-index: 1; cursor: grab; }
+        .event-card:active { cursor: grabbing; }
+        .event-dot { position: absolute; left: 4px; top: 8px; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        
+        .card-content { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; }
+        .time-badge { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .duration-tag { font-size: 11px; background: #F0F2F5; padding: 2px 8px; border-radius: 10px; color: #888; }
+        .card-title { font-size: 16px; font-weight: 700; color: #1C1C1E; }
+        .card-note { font-size: 13px; color: #666; margin-top: 5px; }
 
         /* Modal */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-body { background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 15px; }
-        input, textarea { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #DDD; border-radius: 8px; box-sizing: border-box; }
-        .delete-btn { color: #FF3B30; font-size: 12px; cursor: pointer; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-body { background: white; width: 100%; max-width: 450px; padding: 25px; border-radius: 20px; max-height: 90vh; overflow-y: auto; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; color: #888; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #EEE; border-radius: 10px; box-sizing: border-box; font-size: 15px; background: #F9F9F9; }
+        
+        .footer { position: fixed; bottom: 20px; left: 20px; right: 20px; display: flex; gap: 10px; z-index: 99; }
+        .btn-main { flex: 1; padding: 16px; border-radius: 15px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-danger { background: #FF3B30; color: white; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="header">
-        <h1>我的旅行地圖</h1>
         <div class="day-tabs">
-            <div v-for="n in 5" :key="n" :class="['day-tab', currentDay === n ? 'active' : '']" @click="currentDay = n">
-                Day {{ n }}
+            <div v-for="(day, idx) in days" :key="idx" 
+                 :class="['day-tab', currentDayIdx === idx ? 'active' : '']" 
+                 @click="currentDayIdx = idx">
+                Day {{ idx + 1 }}
             </div>
+            <button class="btn-add-day" @click="addDay">＋ 增加天數</button>
+        </div>
+        <div style="font-size: 12px; color: #AAA; text-align: center; margin-top: 5px;">
+            💡 長按行程卡片可上下拖拽排序
         </div>
     </div>
 
     <div class="timeline">
-        <div v-for="(item, index) in filteredPlan" :key="index" class="event-card">
-            <div class="event-dot"></div>
-            <div class="event-time">{{ item.time || '未定時間' }}</div>
-            <div class="card-content" @click="editItem(index)">
-                <div class="card-title">
-                    {{ item.title }}
+        <draggable v-model="days[currentDayIdx].events" item-key="id" @end="onDragEnd">
+            <template #item="{element, index}">
+                <div class="event-card">
+                    <div class="event-dot"></div>
+                    <div class="time-badge">
+                        {{ element.time }} 
+                        <span class="duration-tag">⌛ {{ element.duration }} 分鐘</span>
+                    </div>
+                    <div class="card-content" @click="openEdit(index)">
+                        <div class="card-title">{{ element.title }}</div>
+                        <div v-if="element.note" class="card-note">{{ element.note }}</div>
+                        <div v-if="element.address" style="color: #00C2DE; font-size: 11px; margin-top:5px;">📍 {{ element.address }}</div>
+                    </div>
                 </div>
-                <div class="card-note">{{ item.note }}</div>
-                <a v-if="item.address" :href="'https://www.google.com/maps/search/'+item.address" target="_blank" class="card-location">📍 {{ item.address }}</a>
-            </div>
-        </div>
-        <div v-if="filteredPlan.length === 0" style="text-align: center; color: #AAA; margin-top: 50px;">
-            這天還沒有行程，按下方「新增行程」開始吧！
+            </template>
+        </draggable>
+        <div v-if="days[currentDayIdx].events.length === 0" style="text-align: center; color: #AAA; margin-top: 80px;">
+            這天還沒有行程，快新增一個吧！
         </div>
     </div>
 
     <div class="footer">
-        <button class="btn btn-add" @click="showModal = true">➕ 新增行程</button>
-        <button class="btn btn-save" @click="saveToFirebase">☁️ 同步雲端</button>
+        <button class="btn-main btn-add" @click="openAdd">➕ 新增景點 / 活動</button>
+        <button v-if="days.length > 1" class="btn-main btn-danger" @click="deleteDay" style="flex: 0.3;">🗑️ 刪除此天</button>
     </div>
 
     <div v-if="showModal" class="modal">
         <div class="modal-body">
-            <h3>{{ editingIndex === null ? '新增行程' : '編輯行程' }}</h3>
-            <input v-model="newItem.time" type="time" placeholder="時間">
-            <input v-model="newItem.title" placeholder="景點名稱/活動">
-            <input v-model="newItem.address" placeholder="地址/Google Maps 連結">
-            <textarea v-model="newItem.note" rows="4" placeholder="備註內容..."></textarea>
-            <button class="btn btn-add" @click="addOrUpdateItem">確定</button>
-            <button class="btn" @click="showModal = false" style="background:#EEE">取消</button>
-            <div v-if="editingIndex !== null" @click="deleteItem" class="delete-btn" style="margin-top:15px; text-align:center">🗑️ 刪除此行程</div>
+            <h3>{{ editingIdx !== null ? '修改行程' : '新增行程' }}</h3>
+            <div class="input-group">
+                <label>景點名稱</label>
+                <input v-model="form.title" placeholder="例如：晴空塔">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>開始時間</label>
+                    <input type="time" v-model="form.time">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>預計需時 (分鐘)</label>
+                    <input type="number" v-model="form.duration" placeholder="60">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>地點/備註</label>
+                <textarea v-model="form.note" rows="3"></textarea>
+            </div>
+            <button class="btn-main btn-add" @click="saveEvent">確認儲存</button>
+            <button class="btn-main" @click="showModal = false" style="background:#EEE; margin-top:10px;">取消</button>
+            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; cursor:pointer;">🗑️ 刪除此項行程</div>
         </div>
     </div>
 </div>
@@ -106,70 +134,93 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    const planRef = ref(db, 'structured_travel_plan'); // 使用新路徑避免混淆舊資料
+    const planRef = ref(db, 'expert_travel_plan');
 
-    const { createApp, ref: vRef, computed } = Vue;
+    const { createApp, ref: vRef, nextTick } = Vue;
 
     createApp({
+        components: { 'draggable': window.vuedraggable },
         setup() {
-            const currentDay = vRef(1);
-            const allPlans = vRef([]);
+            const days = vRef([{ events: [] }]);
+            const currentDayIdx = vRef(0);
             const showModal = vRef(false);
-            const editingIndex = vRef(null);
-            const newItem = vRef({ day: 1, time: '', title: '', note: '', address: '' });
+            const editingIdx = vRef(null);
+            const form = vRef({ title: '', time: '', duration: 60, note: '', id: 0 });
 
-            // 從 Firebase 讀取
+            // 從 Firebase 載入
             onValue(planRef, (snapshot) => {
                 const data = snapshot.val();
-                if (data) allPlans.value = data;
+                if (data) days.value = data;
             });
 
-            const filteredPlan = computed(() => {
-                return allPlans.value
-                    .filter(i => i.day === currentDay.value)
-                    .sort((a, b) => a.time.localeCompare(b.time));
-            });
+            const addDay = () => { days.value.push({ events: [] }); save(); };
+            const deleteDay = () => { if(confirm("確定刪除這整天的行程？")) { days.value.splice(currentDayIdx.value, 1); currentDayIdx.value = 0; save(); } };
 
-            const addOrUpdateItem = () => {
-                if (!newItem.value.title) return alert("請輸入地點名稱");
+            const openAdd = () => {
+                editingIdx.value = null;
+                const events = days.value[currentDayIdx.value].events;
+                let nextTime = "09:00";
                 
-                if (editingIndex.value !== null) {
-                    // 編輯現有項目
-                    const globalIndex = allPlans.value.indexOf(filteredPlan.value[editingIndex.value]);
-                    allPlans.value[globalIndex] = { ...newItem.value, day: currentDay.value };
-                } else {
-                    // 新增項目
-                    allPlans.value.push({ ...newItem.value, day: currentDay.value });
+                // 自動計算時間邏輯：獲取最後一個行程的 結束時間
+                if (events.length > 0) {
+                    const last = events[events.length - 1];
+                    nextTime = calculateEndTime(last.time, parseInt(last.duration) + 15); // 預設加15分鐘交通
                 }
                 
-                resetModal();
-                saveToFirebase();
-            };
-
-            const editItem = (index) => {
-                editingIndex.value = index;
-                newItem.value = { ...filteredPlan.value[index] };
+                form.value = { title: '', time: nextTime, duration: 60, note: '', id: Date.now() };
                 showModal.value = true;
             };
 
-            const deleteItem = () => {
-                const globalIndex = allPlans.value.indexOf(filteredPlan.value[editingIndex.value]);
-                allPlans.value.splice(globalIndex, 1);
-                resetModal();
-                saveToFirebase();
+            const openEdit = (idx) => {
+                editingIdx.value = idx;
+                form.value = { ...days.value[currentDayIdx.value].events[idx] };
+                showModal.value = true;
             };
 
-            const resetModal = () => {
-                newItem.value = { day: currentDay.value, time: '', title: '', note: '', address: '' };
+            const saveEvent = () => {
+                const dayEvents = days.value[currentDayIdx.value].events;
+                if (editingIdx.value !== null) {
+                    dayEvents[editingIdx.value] = { ...form.value };
+                } else {
+                    dayEvents.push({ ...form.value });
+                }
+                autoReschedule(); // 儲存後自動重新推算後續時間
                 showModal.value = false;
-                editingIndex.value = null;
+                save();
             };
 
-            const saveToFirebase = () => {
-                set(planRef, allPlans.value);
+            const deleteEvent = () => {
+                days.value[currentDayIdx.value].events.splice(editingIdx.value, 1);
+                autoReschedule();
+                showModal.value = false;
+                save();
             };
 
-            return { currentDay, allPlans, filteredPlan, showModal, newItem, addOrUpdateItem, editItem, editingIndex, deleteItem, saveToFirebase };
+            const onDragEnd = () => { autoReschedule(); save(); };
+
+            // 核心邏輯：自動重新計算整天的時間鏈
+            const autoReschedule = () => {
+                const events = days.value[currentDayIdx.value].events;
+                for (let i = 1; i < events.length; i++) {
+                    const prev = events[i-1];
+                    // 下一個的開始時間 = 上一個的開始時間 + 需時 + 15分鐘(緩衝)
+                    events[i].time = calculateEndTime(prev.time, parseInt(prev.duration) + 15);
+                }
+            };
+
+            // 時間加法輔助工具 (HH:mm + minutes)
+            const calculateEndTime = (startTime, durationMinutes) => {
+                if (!startTime) return "09:00";
+                let [h, m] = startTime.split(':').map(Number);
+                let totalMinutes = h * 60 + m + durationMinutes;
+                let newH = Math.floor(totalMinutes / 60) % 24;
+                let newM = totalMinutes % 60;
+                return `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
+            };
+
+            const save = () => set(planRef, JSON.parse(JSON.stringify(days.value)));
+
+            return { days, currentDayIdx, showModal, editingIdx, form, addDay, deleteDay, openAdd, openEdit, saveEvent, deleteEvent, onDragEnd };
         }
     }).mount('#app');
 </script>
