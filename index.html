@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Planner OS v18</title>
+    <title>Travel Planner Pro v19</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -15,6 +15,7 @@
         [v-cloak] { display: none; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
+        /* UI Components */
         .header { background: var(--card); padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 10px rgba(0,0,0,0.1); }
         .nav-switch { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin: 10px 0; gap: 4px; }
         .nav-btn { flex: 1; border: none; padding: 10px 5px; border-radius: 10px; cursor: pointer; background: none; font-weight: bold; color: #8E8E93; font-size: 13px; }
@@ -32,17 +33,18 @@
         .card-main { flex: 1; min-width: 0; cursor: pointer; }
         .card-title { font-weight: 700; font-size: 17px; display: block; }
         .card-note { font-size: 12px; color: #666; margin-top: 6px; background: #F8F8F8; padding: 8px; border-radius: 8px; border-left: 3px solid var(--primary); white-space: pre-wrap; }
-        .card-meta { font-size: 12px; color: #8E8E93; margin-top: 4px; display: flex; gap: 10px; }
+        .card-meta { font-size: 12px; color: #8E8E93; margin-top: 4px; display: flex; gap: 10px; align-items: center; }
 
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
         .modal-body { background: var(--card); width: 100%; max-width: 450px; padding: 25px; border-radius: 25px; max-height: 85vh; overflow-y: auto; }
-        .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 15px; }
-        .icon-opt { aspect-ratio: 1; border: 1px solid var(--divider); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: #8E8E93; }
-        .icon-opt.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #DDD; border-radius: 12px; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 15px; }
-        label { font-size: 12px; font-weight: bold; color: #888; }
         
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 1px solid var(--divider); border-radius: 12px; background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 15px; }
+        label { font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; }
+
+        /* 交通間隔樣式 */
+        .transport-divider { margin: 0 0 10px 55px; font-size: 12px; color: #8E8E93; display: flex; align-items: center; gap: 10px; padding: 5px 0; border-left: 2px dashed #DDD; padding-left: 20px; }
+        .btn-transit-check { font-size: 10px; background: #EBF5FF; color: var(--primary); border: 1px solid var(--primary); padding: 2px 8px; border-radius: 20px; text-decoration: none; }
+
         .footer { position: fixed; bottom: 30px; left: 15px; right: 15px; display: flex; gap: 10px; z-index: 99; }
         .btn { flex: 1; padding: 16px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
     </style>
@@ -79,12 +81,8 @@
                 </div>
                 <div style="flex:1;">
                     <label>📍 {{ days[currentDayIdx].city || '設定城市' }}</label>
-                    <div @click="showCityModal = true" class="city-tag" style="color:var(--primary); text-decoration: underline; font-size: 13px; cursor:pointer;">修改地點</div>
+                    <div @click="showCityModal = true" style="color:var(--primary); text-decoration: underline; font-size: 12px; cursor:pointer;">修改地點 / 天氣</div>
                 </div>
-            </div>
-            <div style="margin-top:10px; font-size:12px; color:#888; display:flex; justify-content:space-between;">
-                <span>今日預算: HKD ${{ dailyTotalHKD }}</span>
-                <span>今日天氣: {{ weather.temp }}°C</span>
             </div>
         </div>
 
@@ -102,8 +100,8 @@
                             <div class="card-main" @click="openEdit(index)">
                                 <span class="card-title">{{ element.title || '未命名行程' }}</span>
                                 <div class="card-meta">
-                                    <span style="color:var(--primary); font-weight:bold;">{{ element.time }}</span>
-                                    <span>停留 {{ element.duration }}m</span>
+                                    <span style="color:var(--primary); font-weight:800;">{{ element.time }}</span>
+                                    <span>⌛ {{ element.duration }}m</span>
                                     <span v-if="element.cost > 0" style="color:var(--accent)">💰 ${{ convertToHKD(element.cost, element.currency) }}</span>
                                 </div>
                                 <div v-if="element.note" class="card-note">{{ element.note }}</div>
@@ -112,8 +110,13 @@
                                 <i class="fa-solid fa-location-arrow" style="font-size: 20px;"></i>
                             </a>
                         </div>
-                        <div v-if="index < days[currentDayIdx].events.length - 1" style="margin:0 0 10px 55px; font-size:12px; color:#888;">
-                             <i class="fa-solid fa-ellipsis-vertical"></i> 下一站交通: {{ element.transTime || 0 }} min
+
+                        <div v-if="index < days[currentDayIdx].events.length - 1" class="transport-divider">
+                            <i :class="getTransIcon(element.transMode)"></i>
+                            <span>{{ element.transTime || 0 }} 分鐘</span>
+                            <a :href="getGoogleTransitLink(index)" target="_blank" class="btn-transit-check">
+                                <i class="fa-solid fa-magnifying-glass"></i> 估算交通
+                            </a>
                         </div>
                     </div>
                 </template>
@@ -160,20 +163,27 @@
     <div v-if="showModal" class="modal" @click.self="showModal = false">
         <div class="modal-body">
             <h3>行程設定</h3>
+            <label>分類圖標</label>
             <div class="icon-grid">
                 <div v-for="c in categories" :key="c.id" :class="['icon-opt', form.category === c.id ? 'active' : '']" @click="form.category = c.id">
                     <i :class="c.icon"></i>
                 </div>
             </div>
-            <label>行程名稱</label><input v-model="form.title" placeholder="例如：築地市場">
+            <label>名稱</label><input v-model="form.title" placeholder="景點名稱">
             <div style="display:flex; gap:10px;">
-                <div style="flex:1"><label>開始時間 (自動推算)</label><input type="time" v-model="form.time"></div>
-                <div style="flex:1"><label>預計停留 (分鐘)</label><input type="number" v-model="form.duration"></div>
+                <div style="flex:1"><label>時間 (智慧重算)</label><input type="time" v-model="form.time"></div>
+                <div style="flex:1"><label>停留 (分鐘)</label><input type="number" v-model="form.duration"></div>
             </div>
-            <label>前往下一站交通時間 (分鐘)</label>
-            <input type="number" v-model="form.transTime" placeholder="例如: 15">
+            <label>交通方式 (至下一站)</label>
+            <select v-model="form.transMode">
+                <option value="walk">🚶 步行</option>
+                <option value="transit">🚃 公交/地鐵</option>
+                <option value="drive">🚗 的士/開車</option>
+            </select>
+            <label>交通所需時間 (分鐘)</label>
+            <input type="number" v-model="form.transTime" placeholder="例如: 20">
             
-            <label>備註細節</label><textarea v-model="form.note" rows="3"></textarea>
+            <label>備註</label><textarea v-model="form.note" rows="2"></textarea>
             
             <div style="background:#F2F2F7; padding:15px; border-radius:15px;">
                 <label>支出預算</label>
@@ -184,14 +194,14 @@
                     </select>
                 </div>
             </div>
-            <button class="btn" style="background:var(--primary); width:100%; margin-top:15px;" @click="saveEvent">儲存行程</button>
-            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; cursor:pointer; font-size:14px;">🗑️ 刪除行程</div>
+            <button class="btn" style="background:var(--primary); width:100%; margin-top:15px;" @click="saveEvent">確認儲存</button>
+            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; cursor:pointer;">🗑️ 刪除</div>
         </div>
     </div>
 
     <div v-if="showCityModal" class="modal" @click.self="showCityModal = false">
         <div class="modal-body" style="text-align:center;">
-            <h3>設定所在城市</h3>
+            <h3>設定當天城市</h3>
             <input v-model="cityInput" placeholder="英文名稱，例如: Tokyo" @keyup.enter="setCity" style="text-align:center;">
             <button class="btn" style="background:var(--primary); width:100%; margin-top:10px;" @click="setCity">更新</button>
         </div>
@@ -214,8 +224,8 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    const planRef = ref(db, 'planner_pro_v18');
-    const packRef = ref(db, 'packing_list_v18');
+    const planRef = ref(db, 'planner_pro_v19');
+    const packRef = ref(db, 'packing_list_v19');
 
     const { createApp, ref: vRef, onMounted, computed, watch } = Vue;
 
@@ -231,10 +241,10 @@
             const editingIdx = vRef(null);
             const cityInput = vRef('');
             const newItemText = vRef('');
-            const rates = vRef({ "HKD":1, "JPY":19, "TWD":4, "USD":7.8, "THB":4.5, "KRW":170, "EUR":0.11, "CNY":0.9 });
+            const rates = vRef({ "HKD":1, "JPY":19, "TWD":4, "USD":7.8, "THB":4.5, "KRW":170, "SGD":5.8, "GBP":10.2 });
             const currencyNames = {
                 "HKD": "港幣 (HKD)", "JPY": "日圓 (JPY)", "TWD": "台幣 (TWD)", "USD": "美金 (USD)",
-                "THB": "泰銖 (THB)", "KRW": "韓圓 (KRW)", "EUR": "歐元 (EUR)", "CNY": "人民幣 (CNY)"
+                "SGD": "坡幣 (SGD)", "GBP": "英鎊 (GBP)", "THB": "泰銖 (THB)", "KRW": "韓圓 (KRW)"
             };
             const weather = vRef({ temp: '--', icon: 'fa-solid fa-cloud' });
             
@@ -247,18 +257,14 @@
                 { id:'transport', icon:'fa-solid fa-train' }
             ];
 
-            const form = vRef({ title: '', time: '09:00', duration: 60, transTime: 15, category: 'attraction', cost: 0, currency: 'HKD', note: '', done: false });
+            const form = vRef({ title: '', time: '09:00', duration: 60, transTime: 15, transMode: 'transit', category: 'attraction', cost: 0, currency: 'HKD', note: '', done: false });
 
             onMounted(() => {
                 onValue(planRef, snap => {
                     const data = snap.val();
                     if(data && Array.isArray(data)) {
                         days.value = data.map(day => ({
-                            ...day,
-                            startTime: day.startTime || '09:00',
-                            events: day.events ? day.events.map(ev => ({
-                                ...ev, id: ev.id || Date.now() + Math.random()
-                            })) : []
+                            ...day, startTime: day.startTime || '09:00', events: day.events || []
                         }));
                     }
                     fetchWeather();
@@ -267,30 +273,33 @@
                 fetch('https://open.er-api.com/v6/latest/HKD').then(r => r.json()).then(d => rates.value = d.rates);
             });
 
-            // 核心智慧排程
+            // 智慧重算功能
             const autoReschedule = () => {
                 const day = days.value[currentDayIdx.value];
-                if (!day.events || day.events.length === 0) return;
+                if (!day || !day.events || day.events.length === 0) return;
 
                 let currentTime = day.startTime;
-                day.events.forEach((ev, idx) => {
+                day.events.forEach((ev) => {
                     ev.time = currentTime;
-                    // 下一個行程時間 = 目前時間 + 停留時間 + 交通時間
-                    currentTime = calculateNextTime(currentTime, parseInt(ev.duration || 0) + parseInt(ev.transTime || 0));
+                    currentTime = addMinutes(currentTime, parseInt(ev.duration || 0) + parseInt(ev.transTime || 0));
                 });
                 save();
             };
 
-            const calculateNextTime = (s, dur) => {
-                let [h, m] = s.split(':').map(Number);
-                let tot = h * 60 + m + dur;
-                let nextH = Math.floor(tot / 60) % 24;
-                let nextM = tot % 60;
-                return `${String(nextH).padStart(2,'0')}:${String(nextM).padStart(2,'0')}`;
+            const addMinutes = (timeStr, mins) => {
+                let [h, m] = timeStr.split(':').map(Number);
+                let total = h * 60 + m + mins;
+                return `${String(Math.floor(total/60)%24).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`;
             };
 
-            const onDragEnd = () => {
-                autoReschedule();
+            // 智慧交通連結生成
+            const getGoogleTransitLink = (idx) => {
+                const day = days.value[currentDayIdx.value];
+                const from = day.events[idx].title;
+                const to = day.events[idx + 1].title;
+                const modeMap = { walk: 'walking', transit: 'transit', drive: 'driving' };
+                const mode = modeMap[day.events[idx].transMode] || 'transit';
+                return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=${mode}`;
             };
 
             const fetchWeather = async () => {
@@ -309,9 +318,9 @@
                 let t = days.value[currentDayIdx.value].startTime;
                 if(evs.length > 0) {
                     const last = evs[evs.length-1];
-                    t = calculateNextTime(last.time, parseInt(last.duration || 0) + parseInt(last.transTime || 0));
+                    t = addMinutes(last.time, parseInt(last.duration || 0) + parseInt(last.transTime || 0));
                 }
-                form.value = { title:'', time:t, duration:60, transTime:15, category:'attraction', cost:0, currency:'HKD', note:'', done:false, id: Date.now() };
+                form.value = { title:'', time:t, duration:60, transTime:15, transMode:'transit', category:'attraction', cost:0, currency:'HKD', note:'', done:false, id: Date.now() };
                 showModal.value = true;
             };
 
@@ -319,22 +328,20 @@
                 const evs = days.value[currentDayIdx.value].events;
                 if(editingIdx.value !== null) evs[editingIdx.value] = {...form.value};
                 else evs.push({...form.value});
-                autoReschedule(); // 儲存後自動觸發重算
+                autoReschedule();
                 showModal.value = false;
             };
 
             const convertToHKD = (amt, cur) => (parseFloat(amt || 0) / (rates.value[cur] || 1)).toFixed(1);
             const calculateDailyTotal = (idx) => days.value[idx].events.reduce((s, e) => s + parseFloat(convertToHKD(e.cost, e.currency)), 0).toFixed(0);
-
             const grandTotalHKD = computed(() => days.value.reduce((total, day, idx) => total + parseFloat(calculateDailyTotal(idx)), 0).toFixed(0));
             const dailyTotalHKD = computed(() => calculateDailyTotal(currentDayIdx.value));
             const statsText = computed(() => {
                 const day = days.value[currentDayIdx.value];
-                return day ? `${day.events.filter(e => e.done).length}/${day.events.length}` : '0/0';
+                return day ? `${day.events.filter(e => e.done).length}/${day.events.length} 完成` : '0/0';
             });
 
             const save = () => set(planRef, JSON.parse(JSON.stringify(days.value)));
-
             watch(currentDayIdx, fetchWeather);
 
             return { 
@@ -347,7 +354,8 @@
                 removePacking: (i) => { packingList.value.splice(i,1); savePacking(); },
                 addPacking: () => { if(!newItemText.value) return; packingList.value.push({text: newItemText.value, done:false}); newItemText.value=''; savePacking(); },
                 getCatIcon: (id) => categories.find(c => c.id === id)?.icon || 'fa-solid fa-location-dot',
-                convertToHKD, calculateDailyTotal, exportPDF: () => window.print(), autoReschedule, onDragEnd
+                getTransIcon: (m) => ({ walk:'fa-solid fa-person-walking', transit:'fa-solid fa-train', drive:'fa-solid fa-car' }[m]),
+                getGoogleTransitLink, convertToHKD, calculateDailyTotal, exportPDF: () => window.print(), autoReschedule, onDragEnd: autoReschedule
             };
         }
     }).mount('#app');
