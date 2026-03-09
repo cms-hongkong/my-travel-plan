@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Planner Ultimate Pro</title>
+    <title>Travel Planner Ultimate</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vuedraggable/4.1.0/vuedraggable.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 🎨 動態顏色變數 (支援深色模式) */
         :root {
             --primary: #00C2DE; --bg: #F2F5F8; --card: #FFFFFF; --text: #1C1C1E;
             --accent: #FF9500; --divider: #E5E5EA; --weather: #E0F7FA;
@@ -19,89 +18,118 @@
             --bg: #1C1C1E; --card: #2C2C2E; --text: #F2F2F7;
             --divider: #3A3A3C; --weather: #263238;
         }
-
-        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; padding-bottom: 100px; }
         
-        /* Header & Navigation */
-        .header { background: var(--card); padding: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .nav-mode { display: flex; background: var(--bg); border-radius: 10px; padding: 4px; margin: 10px 0; }
-        .nav-btn { flex: 1; border: none; padding: 8px; border-radius: 8px; cursor: pointer; background: none; color: var(--text); font-weight: bold; }
+        /* Header & Nav */
+        .header { background: var(--card); padding: 15px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-mode { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-top: 10px; }
+        .nav-btn { flex: 1; border: none; padding: 10px; border-radius: 10px; cursor: pointer; background: none; color: var(--text); font-weight: bold; }
         .nav-btn.active { background: var(--card); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* 天氣與儀表板 */
-        .weather-card { margin: 10px; padding: 15px; background: var(--weather); border-radius: 15px; display: flex; align-items: center; justify-content: space-between; }
+        /* Day Tabs */
+        .day-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; align-items: center; }
+        .day-tab { padding: 8px 18px; border-radius: 10px; background: var(--bg); font-size: 14px; cursor: pointer; white-space: nowrap; }
+        .day-tab.active { background: var(--primary); color: white; }
+
+        /* Weather & Summary */
+        .summary-card { margin: 10px; padding: 15px; background: var(--weather); border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Timeline Items */
+        .timeline { padding: 15px; position: relative; }
+        .event-card-container { position: relative; margin-bottom: 10px; }
+        .event-card { background: var(--card); border-radius: 18px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; gap: 12px; align-items: flex-start; }
+        .event-card.completed { opacity: 0.5; }
+        .icon-box { width: 40px; height: 40px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; }
         
-        /* 卡片設計 */
-        .card { background: var(--card); border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 10px; }
-        .event-card { display: flex; gap: 12px; align-items: center; }
-        .event-card.completed { opacity: 0.4; }
+        .card-main { flex: 1; }
+        .card-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+        .card-note { font-size: 12px; color: #888; margin-top: 5px; white-space: pre-wrap; }
+        .card-meta { font-size: 11px; color: var(--primary); font-weight: 500; margin-top: 4px; }
 
-        /* 行李清單樣式 */
-        .packing-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--divider); }
-        .packing-item:last-child { border: none; }
+        /* Transport Divider */
+        .transport-line { padding: 5px 0 5px 55px; font-size: 12px; color: #8E8E93; display: flex; align-items: center; gap: 8px; }
 
-        /* 底部按鈕 */
-        .footer { position: fixed; bottom: 20px; left: 15px; right: 15px; display: flex; gap: 10px; }
-        .btn-round { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; background: var(--primary); color: white; }
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-body { background: var(--card); color: var(--text); width: 100%; max-width: 450px; padding: 25px; border-radius: 25px; max-height: 90vh; overflow-y: auto; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--divider); border-radius: 12px; box-sizing: border-box; font-size: 15px; background: var(--bg); color: var(--text); }
+        
+        /* Icon Selector */
+        .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 15px; }
+        .icon-btn { aspect-ratio: 1; border: 1px solid var(--divider); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .icon-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 深色模式切換鈕 */
-        .theme-toggle { position: absolute; right: 15px; top: 15px; font-size: 20px; color: var(--primary); cursor: pointer; }
-
-        @media print { .header, .footer, .theme-toggle { display: none; } }
+        .footer { position: fixed; bottom: 20px; left: 15px; right: 15px; display: flex; gap: 10px; z-index: 99; }
+        .btn-main { flex: 1; padding: 16px; border-radius: 15px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-primary { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <h2 style="margin:0; font-size:18px;">🌍 Travel Pro Ultimate</h2>
-            <i class="theme-toggle fa-solid" :class="isDark ? 'fa-sun' : 'fa-moon'" @click="toggleTheme"></i>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin:0; font-size:18px;">🌍 Travel Planner OS</h2>
+            <i @click="toggleTheme" class="fa-solid" :class="isDark ? 'fa-sun' : 'fa-moon'" style="color:var(--primary); font-size:20px;"></i>
         </div>
         
         <div class="nav-mode">
-            <button class="nav-btn" :class="{active: viewMode === 'schedule'}" @click="viewMode = 'schedule'">📅 行程</button>
-            <button class="nav-btn" :class="{active: viewMode === 'packing'}" @click="viewMode = 'packing'">🎒 行李清單</button>
+            <button class="nav-btn" :class="{active: viewMode === 'schedule'}" @click="viewMode = 'schedule'">📅 行程規劃</button>
+            <button class="nav-btn" :class="{active: viewMode === 'packing'}" @click="viewMode = 'packing'">🎒 行李檢查</button>
         </div>
 
-        <div v-if="viewMode === 'schedule'" class="day-tabs" style="display:flex; gap:8px; overflow-x:auto;">
-            <div v-for="(day, idx) in days" :class="['day-tab', currentDayIdx === idx ? 'active' : '']" 
-                 @click="currentDayIdx = idx" style="padding:5px 15px; border-radius:10px; background:var(--bg); cursor:pointer;">
+        <div v-if="viewMode === 'schedule'" class="day-tabs">
+            <div v-for="(day, idx) in days" :key="idx" :class="['day-tab', currentDayIdx === idx ? 'active' : '']" @click="currentDayIdx = idx">
                 Day {{ idx + 1 }}
             </div>
-            <button @click="addDay" style="border:none; background:none; color:var(--primary); font-weight:bold;">＋</button>
+            <button @click="addDay" style="background:var(--primary); color:white; border:none; padding:5px 12px; border-radius:8px;">＋</button>
         </div>
     </div>
 
     <div v-if="viewMode === 'schedule'">
-        <div class="weather-card">
+        <div class="summary-card">
             <div style="display:flex; align-items:center; gap:10px;">
                 <i :class="weather.icon" style="font-size:24px;"></i>
-                <div>
+                <div @click="promptCity">
                     <div style="font-weight:bold;">{{ weather.temp }}°C</div>
-                    <div @click="promptCity" style="font-size:12px;">📍 {{ days[currentDayIdx].city || '設定城市' }}</div>
+                    <div style="font-size:11px; opacity:0.8;">📍 {{ days[currentDayIdx].city || '設定城市' }}</div>
                 </div>
             </div>
-            <div style="text-align:right; font-size:12px;">
-                💰 預算: HKD ${{ calculateDailyTotal() }}
+            <div style="text-align:right;">
+                <div style="font-size:11px; opacity:0.8;">今日預算</div>
+                <div style="font-weight:bold;">HKD ${{ calculateDailyTotal() }}</div>
             </div>
         </div>
 
-        <div class="timeline" style="padding:15px;">
-            <draggable v-model="days[currentDayIdx].events" item-key="id" @end="save">
+        <div class="timeline">
+            <draggable v-model="days[currentDayIdx].events" item-key="id" @end="onDragEnd">
                 <template #item="{element, index}">
-                    <div class="card event-card" :class="{completed: element.completed}">
-                        <div @click="element.completed = !element.completed; save()">
-                            <i :class="element.completed ? 'fa-solid fa-check-circle' : 'fa-regular fa-circle'" 
-                               :style="{color: element.completed ? '#34C759' : '#DDD'}"></i>
+                    <div class="event-card-container">
+                        <div class="event-card" :class="{completed: element.completed}">
+                            <div class="check-box" @click="element.completed = !element.completed; save()">
+                                <i :class="element.completed ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'" :style="{color: element.completed ? '#34C759' : '#DDD', fontSize: '20px'}"></i>
+                            </div>
+                            <div class="icon-box" @click="openEdit(index)">
+                                <i :class="getIcon(element.category)"></i>
+                            </div>
+                            <div class="card-main" @click="openEdit(index)">
+                                <div class="card-title">{{ element.title }}</div>
+                                <div class="card-meta">
+                                    <i class="fa-regular fa-clock"></i> {{ element.time }} ({{ element.duration }}m)
+                                    <span v-if="element.expense > 0" style="margin-left:8px;">💰 ${{ convertToHKD(element.expense, element.currency) }}</span>
+                                </div>
+                                <div v-if="element.note" class="card-note">{{ element.note }}</div>
+                            </div>
+                            <a :href="'http://googleusercontent.com/maps.google.com/7' + encodeURIComponent(element.title)" target="_blank" style="color:var(--primary); font-size:20px; padding:10px;">
+                                <i class="fa-solid fa-location-arrow"></i>
+                            </a>
                         </div>
-                        <div style="flex:1" @click="openEdit(index)">
-                            <div style="font-weight:bold;">{{ element.title }}</div>
-                            <div style="font-size:12px; color:var(--primary);">{{ element.time }} ({{ element.duration }}m)</div>
+                        <div v-if="index < days[currentDayIdx].events.length - 1" class="transport-line">
+                            <i :class="getTransportIcon(element.transportMode)"></i>
+                            <span>約 {{ element.transportTime }} 分鐘</span>
                         </div>
-                        <a :href="'http://googleusercontent.com/maps.google.com/6' + encodeURIComponent(element.title)" target="_blank">
-                            <i class="fa-solid fa-location-arrow" style="color:var(--primary)"></i>
-                        </a>
                     </div>
                 </template>
             </draggable>
@@ -109,38 +137,89 @@
     </div>
 
     <div v-if="viewMode === 'packing'" style="padding:15px;">
-        <div class="card">
-            <div v-for="(item, idx) in packingList" :key="idx" class="packing-item">
-                <div @click="item.done = !item.done; savePacking()" style="flex:1; cursor:pointer;">
-                    <i :class="item.done ? 'fa-solid fa-check-square' : 'fa-regular fa-square'" 
-                       :style="{color: item.done ? 'var(--primary)' : '#DDD', marginRight: '10px'}"></i>
-                    <span :style="{textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#888' : 'inherit'}">
-                        {{ item.text }}
-                    </span>
-                </div>
-                <i class="fa-solid fa-trash" @click="removePacking(idx)" style="color:#FF3B30; font-size:12px;"></i>
+        <div style="background:var(--card); border-radius:18px; padding:15px;">
+            <div v-for="(item, idx) in packingList" :key="idx" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid var(--divider);">
+                <i @click="item.done = !item.done; savePacking()" :class="item.done ? 'fa-solid fa-check-square' : 'fa-regular fa-square'" :style="{color: item.done ? var(--primary) : '#DDD', marginRight: '10px', fontSize:'20px'}"></i>
+                <span :style="{flex:1, textDecoration: item.done ? 'line-through' : 'none'}">{{ item.text }}</span>
+                <i class="fa-solid fa-trash" @click="removePacking(idx)" style="color:#FF3B30; opacity:0.5;"></i>
             </div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <input v-model="newPackingItem" placeholder="新增行李..." style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--divider); background:var(--bg); color:var(--text);">
-                <button @click="addPacking" style="padding:10px; background:var(--primary); color:white; border:none; border-radius:8px;">＋</button>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <input v-model="newPackingItem" placeholder="例如：行動電源..." style="flex:1;">
+                <button @click="addPacking" style="background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:10px;">＋</button>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <button class="btn-round" @click="openAdd"><i class="fa-solid fa-plus"></i> 新增項目</button>
-        <button class="btn-round" @click="exportPDF" style="background:#5856D6;"><i class="fa-solid fa-file-export"></i> 匯出</button>
+        <button class="btn-main btn-primary" @click="openAdd">＋ {{ viewMode === 'schedule' ? '新增行程' : '新增物品' }}</button>
+        <button class="btn-main" @click="exportPDF" style="background:#5856D6; color:white; flex:0.4;">匯出</button>
     </div>
 
     <div v-if="showModal" class="modal" @click.self="showModal = false">
-        <div class="modal-body" style="background:var(--card); color:var(--text); padding:20px; border-radius:20px; width:90%; max-width:400px; margin:auto; margin-top:20vh; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
-            <h3>設定行程</h3>
-            <input v-model="form.title" placeholder="景點名稱" style="width:100%; padding:10px; margin-bottom:10px; background:var(--bg); color:var(--text); border:1px solid var(--divider);">
-            <div style="display:flex; gap:10px;">
-                <input type="time" v-model="form.time" style="flex:1; padding:10px; background:var(--bg); color:var(--text); border:1px solid var(--divider);">
-                <input type="number" v-model="form.duration" placeholder="需時" style="flex:1; padding:10px; background:var(--bg); color:var(--text); border:1px solid var(--divider);">
+        <div class="modal-body">
+            <h3>{{ editingIdx !== null ? '編輯行程' : '新增行程' }}</h3>
+            
+            <label style="font-size:12px; color:#888;">選擇圖標</label>
+            <div class="icon-grid">
+                <div v-for="cat in categories" :key="cat.id" :class="['icon-btn', form.category === cat.id ? 'selected' : '']" @click="form.category = cat.id">
+                    <i :class="cat.icon"></i>
+                </div>
             </div>
-            <button @click="saveEvent" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:10px; margin-top:15px;">儲存</button>
+
+            <div class="input-group">
+                <label>行程 / 景點名稱</label>
+                <input v-model="form.title" placeholder="例如：東京迪士尼">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1">
+                    <label>開始時間</label>
+                    <input type="time" v-model="form.time">
+                </div>
+                <div class="input-group" style="flex:1">
+                    <label>預計停留 (分鐘)</label>
+                    <input type="number" v-model="form.duration">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>前往下一站交通</label>
+                <div style="display:flex; gap:8px;">
+                    <select v-model="form.transportMode" style="flex:1.5">
+                        <option value="walk">🚶 步行</option>
+                        <option value="transit">🚃 公共交通</option>
+                        <option value="drive">🚗 的士/開車</option>
+                    </select>
+                    <input type="number" v-model="form.transportTime" placeholder="分" style="flex:1">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>備註細節</label>
+                <textarea v-model="form.note" rows="3" placeholder="例如：預約號碼、必買商品..."></textarea>
+            </div>
+
+            <div style="background:var(--bg); padding:15px; border-radius:15px;">
+                <label style="font-size:12px; color:#888;">支出預算 (選填)</label>
+                <div style="display:flex; gap:8px; margin-top:5px;">
+                    <input type="number" v-model="form.expense" placeholder="金額" style="flex:1">
+                    <select v-model="form.currency" style="flex:0.6">
+                        <option v-for="(r, c) in exchangeRates" :value="c">{{ c }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-main btn-primary" @click="saveEvent" style="width:100%; margin-top:20px;">儲存並同步</button>
+            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; cursor:pointer; font-size:14px;">🗑️ 刪除此行程</div>
+        </div>
+    </div>
+
+    <div v-if="showCityModal" class="modal" @click.self="showCityModal = false">
+        <div class="modal-body" style="text-align:center;">
+            <h3>設定當天城市</h3>
+            <p style="font-size:12px; color:#888;">輸入英文名稱 (例如: Osaka, London)</p>
+            <input v-model="cityInput" style="margin-bottom:15px; text-align:center;">
+            <button class="btn-main btn-primary" @click="setCity" style="width:100%;">確定</button>
         </div>
     </div>
 </div>
@@ -161,10 +240,10 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    const planRef = ref(db, 'ultimate_pro_plan');
-    const packingRef = ref(db, 'packing_list');
+    const planRef = ref(db, 'planner_pro_v5');
+    const packingRef = ref(db, 'packing_list_v5');
 
-    const { createApp, ref: vRef, onMounted } = Vue;
+    const { createApp, ref: vRef, onMounted, watch } = Vue;
 
     createApp({
         components: { 'draggable': window.vuedraggable },
@@ -172,21 +251,32 @@
             const isDark = vRef(false);
             const viewMode = vRef('schedule');
             const days = vRef([{ events: [], city: '' }]);
-            const packingList = vRef([]);
-            const newPackingItem = vRef('');
             const currentDayIdx = vRef(0);
+            const packingList = vRef([]);
             const showModal = vRef(false);
+            const showCityModal = vRef(false);
             const editingIdx = vRef(null);
-            const form = vRef({ title: '', time: '09:00', duration: 60, completed: false });
+            const cityInput = vRef('');
+            const newPackingItem = vRef('');
+            const exchangeRates = vRef({ "HKD": 1, "JPY": 19.3, "TWD": 4.1, "KRW": 170, "USD": 0.128 });
             const weather = vRef({ temp: '--', icon: 'fa-solid fa-cloud-sun' });
+            
+            const categories = [
+                { id: 'attraction', icon: 'fa-solid fa-camera' },
+                { id: 'food', icon: 'fa-solid fa-utensils' },
+                { id: 'flight', icon: 'fa-solid fa-plane' },
+                { id: 'hotel', icon: 'fa-solid fa-hotel' },
+                { id: 'shopping', icon: 'fa-solid fa-bag-shopping' },
+                { id: 'transport', icon: 'fa-solid fa-train' }
+            ];
+
+            const form = vRef({ title: '', time: '09:00', duration: 60, transportMode: 'transit', transportTime: 15, category: 'attraction', expense: 0, currency: 'JPY', note: '', completed: false });
 
             onMounted(() => {
-                // 載入行程
-                onValue(planRef, snap => { if(snap.val()) days.value = snap.val(); });
-                // 載入行李
-                onValue(packingRef, snap => { if(snap.val()) packingList.val = snap.val(); });
-                // 檢查瀏覽器主題
-                if (window.matchMedia('(prefers-color-scheme: dark)').matches) toggleTheme();
+                onValue(planRef, snap => { if(snap.val()) days.value = snap.val(); fetchWeather(); });
+                onValue(packingRef, snap => { if(snap.val()) packingList.value = snap.val(); });
+                // 抓取匯率
+                fetch('https://open.er-api.com/v6/latest/HKD').then(res => res.json()).then(data => { if(data.rates) exchangeRates.value = data.rates; });
             });
 
             const toggleTheme = () => {
@@ -194,34 +284,96 @@
                 document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light');
             };
 
-            const addPacking = () => {
-                if(!newPackingItem.value) return;
-                packingList.value.push({ text: newPackingItem.value, done: false });
-                newPackingItem.value = '';
-                savePacking();
+            // 行程功能
+            const openAdd = () => {
+                if(viewMode.value === 'packing') return;
+                editingIdx.value = null;
+                const evs = days.value[currentDayIdx.value].events;
+                let nextT = "09:00";
+                if(evs.length > 0) {
+                    const last = evs[evs.length-1];
+                    nextT = calculateEndTime(last.time, parseInt(last.duration) + parseInt(last.transportTime));
+                }
+                form.value = { title: '', time: nextT, duration: 60, transportMode: 'transit', transportTime: 15, category: 'attraction', expense: 0, currency: 'JPY', note: '', completed: false, id: Date.now() };
+                showModal.value = true;
             };
 
-            const removePacking = (idx) => { packingList.value.splice(idx,1); savePacking(); };
-            const savePacking = () => set(packingRef, JSON.parse(JSON.stringify(packingList.value)));
-            
-            // 行程相關功能 (同之前...)
-            const addDay = () => { days.value.push({ events: [], city: '' }); save(); };
-            const openAdd = () => { editingIdx.value = null; form.value = { title: '', time: '09:00', duration: 60, completed: false }; showModal.value = true; };
-            const openEdit = (idx) => { editingIdx.value = idx; form.value = {...days.value[currentDayIdx.value].events[idx]}; showModal.value = true; };
+            const openEdit = (idx) => {
+                editingIdx.value = idx;
+                form.value = { ...days.value[currentDayIdx.value].events[idx] };
+                showModal.value = true;
+            };
+
             const saveEvent = () => {
+                if(!form.value.title) return alert("請輸入名稱");
                 const evs = days.value[currentDayIdx.value].events;
-                if(editingIdx.value !== null) evs[editingIdx.value] = {...form.value};
-                else evs.push({...form.value});
+                if(editingIdx.value !== null) evs[editingIdx.value] = { ...form.value };
+                else evs.push({ ...form.value });
+                autoReschedule();
                 showModal.value = false;
                 save();
             };
+
+            const deleteEvent = () => {
+                days.value[currentDayIdx.value].events.splice(editingIdx.value, 1);
+                autoReschedule();
+                showModal.value = false;
+                save();
+            };
+
+            const autoReschedule = () => {
+                const evs = days.value[currentDayIdx.value].events;
+                for(let i=1; i<evs.length; i++) {
+                    const prev = evs[i-1];
+                    evs[i].time = calculateEndTime(prev.time, parseInt(prev.duration) + parseInt(prev.transportTime));
+                }
+            };
+
+            const calculateEndTime = (start, totalDur) => {
+                let [h, m] = start.split(':').map(Number);
+                let tot = h * 60 + m + totalDur;
+                return `${String(Math.floor(tot/60)%24).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`;
+            };
+
+            const addDay = () => { days.value.push({ events: [], city: '' }); save(); };
+            const promptCity = () => { cityInput.value = days.value[currentDayIdx.value].city; showCityModal.value = true; };
+            const setCity = () => { days.value[currentDayIdx.value].city = cityInput.value; showCityModal.value = false; fetchWeather(); save(); };
+
+            const fetchWeather = async () => {
+                const city = days.value[currentDayIdx.value].city;
+                if(!city) return weather.value = { temp: '--', icon: 'fa-solid fa-cloud-sun' };
+                try {
+                    const res = await fetch(`https://wttr.in/${city}?format=j1`);
+                    const data = await res.json();
+                    const curr = data.current_condition[0];
+                    weather.value = { temp: curr.temp_C, icon: 'fa-solid fa-cloud-sun' };
+                } catch(e) {}
+            };
+
+            watch(currentDayIdx, fetchWeather);
+
+            // 行李功能
+            const addPacking = () => { if(!newPackingItem.value) return; packingList.value.push({ text: newPackingItem.value, done: false }); newPackingItem.value = ''; savePacking(); };
+            const removePacking = (idx) => { packingList.value.splice(idx, 1); savePacking(); };
+            const savePacking = () => set(packingRef, JSON.parse(JSON.stringify(packingList.value)));
+
+            // 存檔
             const save = () => set(planRef, JSON.parse(JSON.stringify(days.value)));
-            const calculateDailyTotal = () => { /* 這裡可以加上之前的計算邏輯 */ return 0; };
+            const onDragEnd = () => { autoReschedule(); save(); };
             const exportPDF = () => window.print();
 
-            return { isDark, viewMode, days, currentDayIdx, packingList, newPackingItem, showModal, form, weather, toggleTheme, addPacking, removePacking, savePacking, addDay, openAdd, openEdit, saveEvent, save, calculateDailyTotal, exportPDF };
+            // 輔助
+            const getIcon = (id) => categories.find(c => c.id === id)?.icon || 'fa-solid fa-location-dot';
+            const getTransportIcon = (m) => ({ walk:'fa-solid fa-person-walking', transit:'fa-solid fa-train', drive:'fa-solid fa-car' }[m]);
+            const convertToHKD = (amt, cur) => (amt / exchangeRates.value[cur]).toFixed(1);
+            const calculateDailyTotal = () => {
+                return days.value[currentDayIdx.value].events.reduce((sum, e) => sum + parseFloat(convertToHKD(e.expense, e.currency)), 0).toFixed(0);
+            };
+
+            return { isDark, viewMode, days, currentDayIdx, packingList, showModal, showCityModal, editingIdx, form, categories, exchangeRates, weather, cityInput, newPackingItem, toggleTheme, openAdd, openEdit, saveEvent, deleteEvent, addDay, promptCity, setCity, addPacking, removePacking, savePacking, onDragEnd, exportPDF, getIcon, getTransportIcon, convertToHKD, calculateDailyTotal, save };
         }
     }).mount('#app');
 </script>
+
 </body>
 </html>
