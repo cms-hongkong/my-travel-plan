@@ -3,112 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我的旅行行程表</title>
+    <title>Travel Planner Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #007AFF;
-            --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
+            --primary: #007AFF;
+            --secondary: #5856D6;
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text: #1C1C1E;
         }
+
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-color); 
+            font-family: 'Noto Sans TC', -apple-system, sans-serif; 
+            background-color: var(--bg); 
             margin: 0; 
+            color: var(--text);
+            padding-bottom: 80px; /* 為底部按鈕留白 */
+        }
+
+        /* 頂部導航列 */
+        .header {
+            background: var(--card);
             padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container { 
-            width: 100%;
-            max-width: 600px; 
-            background: var(--card-bg); 
-            padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        }
-        h2 { 
-            text-align: center; 
-            color: #1C1C1E;
-            margin-top: 0;
-            font-weight: 600;
-        }
-        .info-tag {
             text-align: center;
-            font-size: 12px;
-            color: #8E8E93;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* 快速功能按鈕 */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
         }
-        textarea { 
-            width: 100%; 
-            height: 450px; 
-            padding: 15px; 
-            border: 1px solid #D1D1D6; 
-            border-radius: 12px; 
-            font-size: 16px; 
-            line-height: 1.5;
-            box-sizing: border-box; 
-            outline: none;
-            transition: border-color 0.2s;
+
+        .action-chip {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #E5E5EA;
+            cursor: pointer;
         }
-        textarea:focus {
-            border-color: var(--primary-color);
+
+        /* 主要輸入區卡片 */
+        .main-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .btn { 
-            display: block; 
-            width: 100%; 
-            padding: 16px; 
-            background-color: var(--primary-color); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 18px; 
-            font-weight: 600;
-            cursor: pointer; 
-            margin-top: 15px; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        .btn:active { 
-            background-color: #0056b3; 
-            transform: scale(0.98);
-        }
-        #status { 
-            text-align: center; 
-            font-size: 14px; 
-            margin-top: 12px; 
-            height: 20px;
-            color: #34C759; 
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
+
+        .section-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
+            gap: 5px;
+        }
+
+        textarea { 
+            width: 100%; 
+            height: 60vh; 
+            border: none;
+            font-size: 16px; 
+            line-height: 1.6;
+            color: #3A3A3C;
+            outline: none;
+            resize: none;
+            background: transparent;
+        }
+
+        /* 底部儲存按鈕 */
+        .footer-save {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            z-index: 1000;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(0,122,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save:active { transform: scale(0.95); opacity: 0.9; }
+
+        #status {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 8px;
+            color: #8E8E93;
+        }
+
+        /* 載入動畫 */
+        .loader {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: white;
+            display: flex;
             justify-content: center;
-            z-index: 100;
+            align-items: center;
+            z-index: 9999;
         }
     </style>
 </head>
 <body>
 
-<div id="loader" class="loading-overlay">載入中...</div>
+<div id="loader" class="loader">🌏 準備旅程中...</div>
+
+<div class="header">
+    <h1>🧭 My Travel Planner</h1>
+</div>
 
 <div class="container">
-    <h2>✈️ 旅行行程筆記</h2>
-    <div class="info-tag">內容將自動在所有裝置間同步</div>
-    
-    <textarea id="plannerInput" placeholder="在此開始規劃你的行程...&#10;例如：&#10;10:00 抵達機場&#10;12:00 午餐：道地拉麵"></textarea>
-    
-    <button class="btn" onclick="saveData()">💾 儲存並更新雲端</button>
-    <p id="status"></p>
+    <div class="quick-actions">
+        <div class="action-chip" onclick="insertTemplate('flight')">✈️ 航班/飯店模版</div>
+        <div class="action-chip" onclick="insertTemplate('day')">📅 每日行程模版</div>
+        <div class="action-chip" onclick="insertTemplate('packing')">🎒 行李檢查清單</div>
+        <div class="action-chip" onclick="clearAll()">🗑️ 清空</div>
+    </div>
+
+    <div class="main-card">
+        <div class="section-label">📍 行程內容編輯</div>
+        <textarea id="plannerInput" placeholder="點擊下方的模版按鈕快速開始，或者直接開始寫作..."></textarea>
+    </div>
+</div>
+
+<div class="footer-save">
+    <button class="btn-save" onclick="saveData()">💾 儲存所有更改</button>
+    <div id="status">最後同步：尚未儲存</div>
 </div>
 
 <script type="module">
-    // 引入 Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
-    // 使用你提供的 Config
+    // 使用你提供的 Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBcaK3Bzs4IRIlnV3V3JEdlzpDBdCXhWKg",
         authDomain: "travel-planner-6f08d.firebaseapp.com",
@@ -119,7 +179,6 @@
         appId: "1:545387212656:web:8f67189deb55935e9529b5"
     };
 
-    // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const planRef = ref(db, 'shared_travel_plan');
@@ -128,31 +187,39 @@
     const statusText = document.getElementById('status');
     const loader = document.getElementById('loader');
 
-    // 1. 自動讀取：當開啟網頁或雲端有變動時，更新畫面
     onValue(planRef, (snapshot) => {
         const data = snapshot.val();
-        if (data !== null) {
-            inputArea.value = data;
-        }
-        loader.style.display = 'none'; // 隱藏載入畫面
+        if (data !== null) inputArea.value = data;
+        loader.style.display = 'none';
     });
 
-    // 2. 儲存功能
     window.saveData = () => {
-        const content = inputArea.value;
-        statusText.style.color = "#8E8E93";
-        statusText.innerText = "正在儲存到雲端...";
+        statusText.innerText = "正在儲存中...";
+        set(planRef, inputArea.value).then(() => {
+            const now = new Date();
+            statusText.innerText = `最後同步：${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+        });
+    };
 
-        set(planRef, content)
-            .then(() => {
-                statusText.style.color = "#34C759";
-                statusText.innerText = "✅ 已成功儲存！所有裝置同步中。";
-                setTimeout(() => { statusText.innerText = ""; }, 3000);
-            })
-            .catch((error) => {
-                statusText.style.color = "#FF3B30";
-                statusText.innerText = "❌ 儲存失敗：" + error.message;
-            });
+    // 快捷模版功能
+    window.insertTemplate = (type) => {
+        let template = "";
+        if (type === 'flight') {
+            template = "\n--- ✈️ 航班與飯店 ---\n航班：[航班號碼]\n起飛：[時間] / 到達：[時間]\n飯店：[名稱]\n地址：[Google Maps 連結]\n確認碼：[12345678]\n";
+        } else if (type === 'day') {
+            template = "\n--- 📅 Day 1 ---\n09:00 | [景點名稱]\n12:00 | [餐廳名稱]\n15:00 | [活動]\n19:00 | [晚餐/回飯店]\n";
+        } else if (type === 'packing') {
+            template = "\n--- 🎒 行李檢查清單 ---\n[ ] 護照/簽證\n[ ] 充電器/行動電源\n[ ] 換洗衣服\n[ ] 常用藥品\n";
+        }
+        inputArea.value += template;
+        saveData(); // 自動儲存一下
+    };
+
+    window.clearAll = () => {
+        if(confirm("確定要清空所有行程嗎？")) {
+            inputArea.value = "";
+            saveData();
+        }
     };
 </script>
 
