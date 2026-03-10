@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel OS Pro v31</title>
+    <title>Travel OS Pro v32</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -38,9 +38,9 @@
         .day-tab .day-num { font-size: 14px; font-weight: 700; color: var(--primary); }
         .day-tab .day-date { font-size: 10px; color: var(--secondary); margin-top: 2px; }
 
-        /* 地圖與卡片 */
+        /* 卡片設計 */
         #map { height: 160px; width: calc(100% - 30px); margin: 15px; border-radius: 20px; z-index: 1; border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #eee; }
-        .card { background: var(--card); border-radius: 20px; padding: 18px; margin: 10px 15px; border: 1px solid var(--divider); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .card { background: var(--card); border-radius: 20px; padding: 18px; margin: 10px 15px; border: 1px solid var(--divider); }
         
         .event-card { display: flex; gap: 12px; align-items: flex-start; }
         .event-card.is-done { opacity: 0.5; }
@@ -50,13 +50,12 @@
         .card-meta { font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 8px; margin-top: 4px; }
         .card-note { font-size: 12px; color: #78909C; background: var(--bg); padding: 8px; border-radius: 8px; margin-top: 8px; white-space: pre-wrap; line-height: 1.5; }
 
-        /* 交通分隔線 */
         .transport-divider { margin: -5px 0 12px 65px; border-left: 2px dashed var(--primary-light); padding: 5px 15px; font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
-        .btn-transit-link { color: var(--primary); text-decoration: none; font-weight: bold; background: var(--primary-light); padding: 2px 8px; border-radius: 10px; }
+        .btn-transit-link { color: var(--primary); text-decoration: none; font-weight: bold; background: var(--primary-light); padding: 2px 8px; border-radius: 10px; font-size: 10px; }
 
-        /* Logo 選擇器 */
+        /* Logo 選擇器 - 確保 100% 響應點擊 */
         .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
-        .icon-opt { aspect-ratio: 1; border: 2px solid var(--divider); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--secondary); background: var(--bg); transition: 0.2s; }
+        .icon-opt { aspect-ratio: 1; border: 2.5px solid var(--divider); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--secondary); background: var(--bg); transition: 0.2s; }
         .icon-opt.active-logo { background: var(--primary-light); color: var(--primary); border-color: var(--primary); transform: scale(1.05); }
 
         /* 彈窗 */
@@ -73,7 +72,7 @@
         @media print { 
             .header, .footer, #map, .nav-switch { display: none !important; } 
             .print-date-label { display: block !important; font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 15px; }
-            .card { break-inside: avoid; border: 1px solid #eee; margin-bottom: 20px; }
+            .card { break-inside: avoid; border: 1px solid #eee; margin-bottom: 20px; box-shadow: none; }
             body { background: white; padding: 20px; }
         }
         .print-date-label { display: none; }
@@ -84,14 +83,14 @@
 <div id="app" v-cloak>
     <div v-if="!isInitialized" class="wizard-overlay">
         <div class="wizard-content">
-            <i class="fa-solid fa-earth-asia" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
+            <i class="fa-solid fa-compass" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
             <h2 style="margin-bottom: 5px;">旅程初始化</h2>
             <p style="color: var(--secondary); margin-bottom: 30px; font-size: 14px;">請輸入您的旅行計劃</p>
             
             <input v-model="config.dest" class="wizard-input" placeholder="目的地 (例如: Tokyo)" @input="autoDetectMeta">
-            <label style="font-size: 12px; color: var(--secondary); display: block; text-align: left; margin-bottom: 5px;">出發日期</label>
+            <label style="font-size: 11px; color: var(--secondary); display: block; text-align: left; margin-bottom: 5px; font-weight: 700;">出發日期</label>
             <input type="date" v-model="config.startDate" class="wizard-input">
-            <label style="font-size: 12px; color: var(--secondary); display: block; text-align: left; margin-bottom: 5px;">回程日期</label>
+            <label style="font-size: 11px; color: var(--secondary); display: block; text-align: left; margin-bottom: 5px; font-weight: 700;">回程日期</label>
             <input type="date" v-model="config.endDate" class="wizard-input">
 
             <button class="wizard-btn" @click="finishWizard">生成我的行程表</button>
@@ -101,7 +100,7 @@
     <div class="header" v-if="isInitialized">
         <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 15px 5px 15px;">
             <h2 style="margin:0; font-size:18px; color: var(--primary);">{{ config.dest }} Trip</h2>
-            <div @click="resetConfig" style="font-size: 11px; color: var(--secondary); cursor:pointer;"><i class="fa-solid fa-rotate-right"></i> 重設</div>
+            <div @click="resetConfig" style="font-size: 11px; color: var(--secondary); cursor:pointer;"><i class="fa-solid fa-rotate-left"></i> 重設</div>
         </div>
         
         <div class="nav-switch">
@@ -130,10 +129,10 @@
         <div class="card" style="margin-top: -10px; padding: 12px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                    <label style="font-size: 10px; color: var(--secondary);">當地天氣/起始時間</label>
+                    <label style="font-size: 10px; color: var(--secondary);">天氣/起始時間</label>
                     <div style="font-weight:700; font-size: 14px;">
                         <i class="fa-solid fa-cloud-sun" style="color:var(--primary);"></i> {{ weather.temp }}°C | 
-                        <input type="time" v-model="days[currentDayIdx].startTime" @change="autoReschedule" style="border:none; background:none; font-weight:700; color:var(--primary); width:70px; font-size:14px;">
+                        <input type="time" v-model="days[currentDayIdx].startTime" @change="autoReschedule" style="border:none; background:none; font-weight:700; color:var(--primary); width:70px; font-size:14px; outline:none;">
                     </div>
                 </div>
                 <div style="text-align: right;">
@@ -160,7 +159,7 @@
                                 <span class="card-title">{{ element.title || '新行程' }}</span>
                                 <div class="card-meta">
                                     <span style="color:var(--primary); font-weight:800;">{{ element.time }}</span>
-                                    <span style="background:#EBF5FF; padding:1px 4px; border-radius:4px;">HK {{ getHKTime(element.time) }}</span>
+                                    <span>HK {{ getHKTime(element.time) }}</span>
                                     <span v-if="element.cost > 0" style="color:var(--accent);">💰 ${{ safeConvertToHKD(element.cost, element.currency) }}</span>
                                 </div>
                                 <div v-if="element.note" class="card-note">{{ element.note }}</div>
@@ -195,30 +194,30 @@
         </div>
     </div>
 
-    <div v-if="view === 'member'" style="padding: 15px;">
-        <div class="card">
-            <h3>👥 旅伴管理</h3>
-            <div v-for="(m, i) in members" :key="i" style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--divider);">
-                <span>{{ m }}</span>
-                <i class="fa-solid fa-circle-xmark" @click="removeMember(i)" style="color:#FFAB91; cursor:pointer;"></i>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <input v-model="newMemberName" placeholder="成員名字" style="margin:0;">
-                <button @click="addMember" style="background:var(--primary); color:white; border:none; padding:12px 20px; border-radius:12px; font-weight:bold;">＋</button>
-            </div>
-        </div>
-    </div>
-
     <div v-if="view === 'pack'" style="padding: 15px;">
-        <button class="btn btn-primary" style="margin-bottom:15px; width:100%;" @click="suggestPacking">✨ AI 智能建議行李</button>
+        <button class="btn btn-primary" style="margin-bottom:15px; width:100%;" @click="suggestPacking">✨ AI 智能建議</button>
         <div v-for="(item, i) in packingList" :key="i" class="card" style="padding:15px; margin:0 0 10px 0; display:flex; align-items:center;">
             <i @click="item.done = !item.done; savePacking()" :class="item.done ? 'fa-solid fa-square-check' : 'fa-regular fa-square'" :style="{color: item.done ? 'var(--primary)' : '#CFD8DC', fontSize:'24px', marginRight:'15px'}"></i>
             <span :style="{flex:1, textDecoration: item.done ? 'line-through' : 'none'}">{{ item.text }}</span>
             <i class="fa-solid fa-trash" @click="removePacking(i)" style="color:red; opacity:0.3;"></i>
         </div>
-        <div style="display:flex; gap:10px; margin-top:20px;">
+        <div style="display:flex; gap:10px; margin-top:15px;">
             <input v-model="newItemText" placeholder="新增行李..." style="margin:0;">
-            <button @click="addPacking" style="background:var(--primary); color:white; border:none; padding:12px 20px; border-radius:12px;">＋</button>
+            <button @click="addPacking" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:12px;">＋</button>
+        </div>
+    </div>
+
+    <div v-if="view === 'member'" style="padding: 15px;">
+        <div class="card">
+            <h3>👥 旅伴管理</h3>
+            <div v-for="(m, i) in members" :key="i" style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #divider;">
+                <span>{{ m }}</span>
+                <i class="fa-solid fa-circle-xmark" @click="removeMember(i)" style="color:#FFAB91;"></i>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <input v-model="newMemberName" placeholder="成員名字" style="margin:0;">
+                <button @click="addMember" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:12px;">＋</button>
+            </div>
         </div>
     </div>
 
@@ -250,7 +249,7 @@
             <label style="font-size: 11px; font-weight: 800; color: var(--secondary);">3. 交通至下一站 (分鐘)</label>
             <input type="number" v-model="form.transTime">
 
-            <label style="font-size: 11px; font-weight: 800; color: var(--secondary);">4. 費用及分擔</label>
+            <label style="font-size: 11px; font-weight: 800; color: var(--secondary);">4. 費用與拆帳</label>
             <div style="background:var(--bg); padding:12px; border-radius:15px; margin-bottom:12px;">
                 <small>付款人：</small><select v-model="form.paidBy" style="padding:5px; margin-bottom:10px;"><option v-for="m in members" :value="m">{{m}}</option></select>
                 <div style="display:flex; flex-wrap:wrap; gap:5px;">
@@ -271,8 +270,8 @@
                     </select>
                 </div>
             </div>
-            <button class="btn btn-primary" style="width:100%; margin-top:15px;" @click="saveEvent">儲存項目</button>
-            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; font-size:13px; cursor:pointer;">🗑️ 刪除此項</div>
+            <button class="btn btn-primary" style="width:100%; margin-top:15px;" @click="saveEvent">儲存行程</button>
+            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; font-size:13px; cursor:pointer;">🗑️ 刪除項目</div>
         </div>
     </div>
 
@@ -303,10 +302,10 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    const planRef = ref(db, 'planner_final_v31');
-    const packRef = ref(db, 'packing_list_v31');
-    const memberRef = ref(db, 'members_v31');
-    const configRef = ref(db, 'travel_config_v31');
+    const planRef = ref(db, 'planner_pro_v32');
+    const packRef = ref(db, 'packing_list_v32');
+    const memberRef = ref(db, 'members_v32');
+    const configRef = ref(db, 'travel_config_v32');
 
     const { createApp, ref: vRef, onMounted, computed, watch, nextTick } = Vue;
 
@@ -350,11 +349,11 @@
             };
 
             const finishWizard = () => {
-                if(!config.value.dest || !config.value.startDate || !config.value.endDate) return alert("請完整填寫");
+                if(!config.value.dest || !config.value.startDate || !config.value.endDate) return alert("請填寫所有欄位");
                 const start = new Date(config.value.startDate);
                 const end = new Date(config.value.endDate);
-                const diff = Math.ceil(Math.abs(end - start) / 86400000) + 1;
-                const newDays = Array.from({length: diff}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
+                const diffDays = Math.ceil(Math.abs(end - start) / 86400000) + 1;
+                const newDays = Array.from({length: diffDays}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
                 days.value = newDays;
                 set(configRef, config.value); set(planRef, newDays);
                 isInitialized.value = true;
@@ -407,7 +406,6 @@
                     if(d.includes('tokyo')||d.includes('japan')) config.value.currency = 'JPY';
                 },
                 openAdd: () => {
-                    editingIdx.value = null;
                     const d = days.value[currentDayIdx.value];
                     let t = d.startTime || '07:00';
                     if(d.events?.length > 0) {
@@ -451,11 +449,13 @@
                 exportPDF: () => window.print(),
                 resetConfig: () => { if(confirm("確定重設行程嗎？所有數據將清空。")) { set(configRef, null); location.reload(); } },
                 safeConvertToHKD: (amt, cur) => (parseFloat(amt || 0) / (rates.value[cur] || 1)).toFixed(1),
+                calculateDailyTotal: (idx) => (days.value[idx]?.events || []).reduce((s, e) => s + parseFloat(e.cost || 0) / (rates.value[e.currency] || 1), 0).toFixed(0),
                 grandTotalHKD: computed(() => days.value.reduce((t, _, i) => t + parseFloat((days.value[i]?.events || []).reduce((s, e) => s + parseFloat(e.cost || 0) / (rates.value[e.currency] || 1), 0)), 0).toFixed(0)),
                 dailyTotalHKD: computed(() => (days.value[currentDayIdx.value]?.events || []).reduce((s, e) => s + parseFloat(e.cost || 0) / (rates.value[e.currency] || 1), 0).toFixed(0)),
                 statsText: computed(() => { const evs = days.value[currentDayIdx.value]?.events || []; return `${evs.filter(e=>e.done).length}/${evs.length} 完成`; }),
                 hasValidExpenses: (idx) => (days.value[idx]?.events || []).some(e => parseFloat(e.cost||0) > 0),
                 uploadVault: (e) => { const f = e.target.files[0]; const r = new FileReader(); r.onloadend = () => { form.value.vaultImg = r.result; }; if(f) r.readAsDataURL(f); },
+                suggestPacking: () => { const l = ["護照", "行動電源"]; if(weather.value.temp < 15) l.push("大褸"); l.forEach(t => { if(!packingList.value.some(p=>p.text===t)) packingList.value.push({text:t, done:false}); }); },
                 save, savePacking
             };
         }
