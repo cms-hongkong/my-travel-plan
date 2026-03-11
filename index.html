@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Master v53</title>
+    <title>Travel Master v54</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -28,6 +28,8 @@
         .card-title { font-weight: 700; font-size: 16px; color: var(--text); }
         .card-meta { font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 8px; margin-top: 4px; }
         .info-box { font-size: 12px; color: #546E7A; background: var(--bg); padding: 10px; border-radius: 10px; margin-top: 10px; white-space: pre-wrap; border-left: 3px solid var(--primary); line-height: 1.6; }
+        .transport-divider { margin: -5px 0 12px 65px; border-left: 2px dashed var(--primary-light); padding: 5px 15px; font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .btn-transit { background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 10px; font-weight: bold; text-decoration: none; font-size: 10px; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
         .modal-body { background: var(--card); width: 100%; max-width: 420px; padding: 20px; border-radius: 25px; max-height: 90vh; overflow-y: auto; }
         input, select, textarea { font-size: 16px; padding: 10px; width: 100%; box-sizing: border-box; border: 1.5px solid var(--divider); border-radius: 10px; margin-bottom: 12px; background: var(--bg); outline: none; }
@@ -37,7 +39,7 @@
         .btn-secondary { background: #5856D6; flex: 0.3; }
         #forceReset { position: fixed; bottom: 5px; right: 5px; z-index: 9999; background: #FF5252; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; opacity: 0.5; }
         .chip { display: inline-block; padding: 5px 12px; background: var(--bg); border-radius: 15px; font-size: 11px; margin: 3px; cursor: pointer; border: 1px solid transparent; }
-        .chip.active { background: var(--primary-light); color: var(--primary); font-weight: bold; border: 1px solid var(--primary); }
+        .chip.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); font-weight: bold; }
         .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
         .icon-opt { aspect-ratio: 1; border: 2px solid var(--divider); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--secondary); }
         .icon-opt.selected { background: var(--primary); color: white; }
@@ -45,24 +47,24 @@
 </head>
 <body>
 
-<button id="forceReset" onclick="if(confirm('確定重置？所有數據將清除')){localStorage.clear(); window.location.reload();}">⚠️ 強制重設</button>
+<button id="forceReset" onclick="if(confirm('確定清除？數據將消失')){localStorage.clear(); window.location.reload();}">⚠️ 強制重設</button>
 
 <div id="app" v-cloak>
     <div v-if="!isInitialized" class="wizard-overlay">
         <div class="wizard-content">
             <i class="fa-solid fa-earth-asia" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
-            <h2>Travel Master v53</h2>
-            <p style="color: var(--secondary); font-size: 14px; margin-bottom: 30px;">填寫資訊開啟您的全新行程 (修復覆蓋問題)</p>
+            <h2>Travel Master v54</h2>
+            <p style="color: var(--secondary); font-size: 14px; margin-bottom: 30px;">修復多日數據同步問題</p>
             <input v-model="config.dest" class="wizard-input" placeholder="目的地 (例如: Tokyo)">
             <input type="date" v-model="config.startDate" class="wizard-input">
             <input type="date" v-model="config.endDate" class="wizard-input">
-            <button class="wizard-btn" @click="finishWizard">開啟行程表</button>
+            <button class="wizard-btn" @click="finishWizard">生成我的行程表</button>
         </div>
     </div>
 
     <div class="header" v-if="isInitialized">
         <div style="display:flex; justify-content:space-between; align-items:center; padding: 0 20px 5px 20px;">
-            <h2 style="margin:0; font-size:18px; color: var(--primary);">{{ config.dest }}</h2>
+            <h2 style="margin:0; font-size:18px; color: var(--primary);">{{ config.dest }} Trip</h2>
             <div @click="resetConfig" style="font-size: 11px; color: var(--secondary); cursor:pointer;">重設</div>
         </div>
         <div class="nav-switch">
@@ -74,7 +76,7 @@
         <div v-if="view === 'plan'" class="day-tabs-wrapper">
             <div v-for="(day, idx) in days" :key="idx" :class="['day-tab', currentDayIdx === idx ? 'active' : '']" @click="currentDayIdx = idx">
                 <span style="font-size:14px; font-weight:700;">Day {{ idx + 1 }}</span>
-                <span style="font-size:10px;">{{ getDayDate(idx) }}</span>
+                <span style="font-size:10px; color:var(--secondary)">{{ getDayDate(idx) }}</span>
             </div>
             <div @click="addExtraDay" class="day-tab" style="background:none; border:1.5px dashed #ddd;"><i class="fa-solid fa-plus"></i></div>
         </div>
@@ -85,10 +87,10 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div v-if="days[currentDayIdx]">
                     <label style="font-size: 10px;">☀️ {{ weather.temp }}°C</label>
-                    <div><input type="time" v-model="days[currentDayIdx].startTime" @change="autoReschedule" style="border:none; background:none; font-weight:700; color:var(--primary); font-size:14px; width:75px; outline:none;"></div>
+                    <div style="font-weight:700;"><input type="time" v-model="days[currentDayIdx].startTime" @change="autoReschedule" style="border:none; background:none; font-weight:700; color:var(--primary); font-size:14px; width:75px; outline:none;"></div>
                 </div>
                 <div style="text-align: right;">
-                    <label style="font-size: 10px;">今日累計支出</label>
+                    <label style="font-size: 10px;">今日預計支出</label>
                     <div style="font-weight:700; color:var(--accent);">HKD ${{ dailyTotalHKD }}</div>
                 </div>
             </div>
@@ -102,36 +104,32 @@
                     </div>
                     <div class="cat-icon-box" @click="openEdit(index)"><i :class="getCatIcon(element.category)"></i></div>
                     <div class="card-main" @click="openEdit(index)">
-                        <span class="card-title">{{ element.title || '未命名項目' }}</span>
+                        <span class="card-title">{{ element.title || '新行程' }}</span>
                         <div class="card-meta">
                             <span style="color:var(--primary); font-weight:800;">{{ element.time }}</span>
                             <span v-if="element.cost > 0" style="color:var(--accent);">💰 ${{ safeConvertToHKD(element.cost, element.currency) }}</span>
                         </div>
                         <div class="info-box" v-if="element.note || element.url || element.phone">
                             <div v-if="element.note">{{ element.note }}</div>
-                            <div v-if="element.url" style="color:var(--primary); font-weight:bold;">🌐 查看連結</div>
+                            <div v-if="element.url" style="color:var(--primary); font-weight:bold; font-size:11px;"><i class="fa-solid fa-link"></i> 查看網址</div>
                             <div v-if="element.phone">📞 {{ element.phone }}</div>
                         </div>
                     </div>
                     <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(element.title || '')" target="_blank" style="color:var(--primary); padding:10px;"><i class="fa-solid fa-location-arrow"></i></a>
                 </div>
-                <div v-if="index < computedEvents.length - 1" style="margin: -5px 0 12px 65px; border-left: 2px dashed var(--primary-light); padding: 5px 15px; font-size: 11px; color: var(--secondary);">{{ element.transTime || 0 }}m 交通</div>
+                <div v-if="index < computedEvents.length - 1" class="transport-divider">
+                    <span>{{ element.transTime || 0 }}m 交通</span>
+                    <a :href="'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(computedEvents[index].title) + '&destination=' + encodeURIComponent(computedEvents[index+1].title) + '&travelmode=transit'" target="_blank" class="btn-transit">🔍 估算</a>
+                </div>
             </div>
-            <div v-if="computedEvents.length === 0" style="text-align:center; padding:50px; color:var(--secondary); font-size:13px;">按下「＋」開始新增行程，不會再被覆蓋</div>
+            <div v-if="computedEvents.length === 0" style="text-align:center; padding:50px; color:var(--secondary); font-size:13px;">點擊「＋」新增行程</div>
         </div>
     </div>
 
     <div v-if="view === 'cost' && isInitialized" style="padding: 15px;">
         <div class="card" style="background: var(--primary); color: white; border: none; text-align:center;">
-            <div style="font-size: 12px; opacity: 0.8;">預算總支出</div>
+            <div style="font-size: 12px; opacity: 0.8;">全體預算總支出</div>
             <div style="font-size: 32px; font-weight: 800;">HKD ${{ grandTotalHKD }}</div>
-        </div>
-        <h4 style="margin-left:15px;">📊 結算報告</h4>
-        <div class="card" v-for="res in safeSettleReport" :key="res.from + res.to">
-            <div style="display:flex; justify-content:space-between;">
-                <span><b>{{ res.from }}</b> ➡️ <b>{{ res.to }}</b></span>
-                <span style="color:var(--primary); font-weight:bold;">HKD ${{ res.amount }}</span>
-            </div>
         </div>
     </div>
 
@@ -143,16 +141,9 @@
                 <i class="fa-solid fa-circle-xmark" @click="removeMember(i)" style="color:#FFAB91; cursor:pointer;" v-if="m !== '我'"></i>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <input v-model="newMemberName" placeholder="旅伴姓名" style="margin:0;">
+                <input v-model="newMemberName" placeholder="成員姓名" style="margin:0;">
                 <button @click="addMember" style="background:var(--primary); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">＋</button>
             </div>
-        </div>
-    </div>
-
-    <div v-if="view === 'pack'" style="padding: 15px;">
-        <div v-for="item in packingList" :key="item.id" class="card" style="padding:15px; margin-bottom:10px; display:flex; align-items:center;">
-            <i @click="togglePacking(item)" :class="item.done ? 'fa-solid fa-square-check' : 'fa-regular fa-square'" :style="{color: item.done ? 'var(--primary)' : '#CFD8DC', fontSize:'24px', marginRight:'15px'}"></i>
-            <span :style="{flex:1, textDecoration: item.done ? 'line-through' : 'none'}">{{ item.text }}</span>
         </div>
     </div>
 
@@ -163,29 +154,29 @@
 
     <div v-if="showModal" class="modal" @click.self="showModal = false">
         <div class="modal-body">
-            <h3>行程詳情</h3>
+            <h3>項目詳情</h3>
             <div class="icon-grid">
                 <div v-for="c in categories" :key="c.id" class="icon-opt" :class="{ 'selected': form.category === c.id }" @click="form.category = c.id"><i :class="c.icon"></i></div>
             </div>
-            <input v-model="form.title" placeholder="景點或項目名稱">
+            <input v-model="form.title" placeholder="景點或活動名稱">
             <div style="display:flex; gap:10px;">
                 <div style="flex:1"><label>時間</label><input type="time" v-model="form.time"></div>
                 <div style="flex:1"><label>停留(分)</label><input type="number" v-model="form.duration"></div>
             </div>
-            <input v-model="form.url" placeholder="官網或地圖連結">
-            <input v-model="form.phone" placeholder="聯絡電話">
-            <textarea v-model="form.note" rows="2" placeholder="備註、門票..."></textarea>
+            <input v-model="form.url" placeholder="網址 (連結)">
+            <input v-model="form.phone" placeholder="電話">
+            <textarea v-model="form.note" rows="2" placeholder="詳細備註..."></textarea>
             <div style="background:var(--bg); padding:15px; border-radius:15px;">
                 <small>付款人：</small><select v-model="form.paidBy" style="padding:5px;"><option v-for="m in members" :value="m">{{m}}</option></select>
                 <div style="margin-top:10px;"><small>分擔對象：</small></div>
-                <div style="display:flex; flex-wrap:wrap;"><span v-for="m in members" @click="toggleSplit(m)" :class="['chip', (form.splitWith && form.splitWith.includes(m)) ? 'active' : '']">{{m}}</span></div>
+                <div style="display:flex; flex-wrap:wrap;"><span v-for="m in members" @click="toggleSplit(m)" :class="['chip', form.splitWith?.includes(m) ? 'active' : '']">{{m}}</span></div>
                 <div style="display:flex; gap:8px; margin-top:10px;">
                     <input type="number" v-model="form.cost" style="flex:1; margin:0;" placeholder="金額">
                     <select v-model="form.currency" style="flex:1; margin:0;"><option v-for="(n, c) in currencyNames" :value="c">{{n}}</option></select>
                 </div>
             </div>
-            <button class="btn btn-primary" style="width:100%; margin-top:15px;" @click="saveEvent">儲存行程</button>
-            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; font-size:12px; cursor:pointer;">🗑️ 刪除</div>
+            <button class="btn btn-primary" style="width:100%; margin-top:15px;" @click="saveEvent">儲存項目</button>
+            <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; font-size:12px; cursor:pointer;">🗑️ 刪除項目</div>
         </div>
     </div>
 </div>
@@ -206,15 +197,11 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    // 💡 全新路徑，徹底擺脫覆蓋 Bug
-    const planRef = ref(db, 'master_v53_final_pro_plan'); 
-    const configRef = ref(db, 'config_v53_pro');
-    const packRef = ref(db, 'packing_list_v53');
-    const memberRef = ref(db, 'members_v53');
+    const planRef = ref(db, 'master_v54_stable_final_plan'); 
+    const configRef = ref(db, 'config_v54_pro');
+    const memberRef = ref(db, 'members_v54_pro');
 
     const { createApp, ref: vRef, onMounted, computed, watch, triggerRef } = Vue;
-
-    const PRELOADED_PACKING = ["錢包", "信用卡", "身分證", "護照", "行程表", "SIM卡", "相機", "手機充電器", "行動電源", "萬用插頭", "外套", "睡衣", "常用藥", "雨傘"];
 
     createApp({
         setup() {
@@ -222,13 +209,12 @@
             const view = vRef('plan');
             const days = vRef([]);
             const config = vRef({ dest: '', startDate: '', endDate: '', currency: 'HKD' });
-            const packingList = vRef([]);
             const members = vRef(['我']);
             const currentDayIdx = vRef(0);
             const showModal = vRef(false);
             const editingIdx = vRef(null);
             const weather = vRef({ temp: '--' });
-            const rates = vRef({ "HKD":1, "JPY":19.3, "TWD":4.1, "USD":7.8 }); 
+            const rates = vRef({ "HKD":1, "JPY":20, "USD":7.8 }); 
             const currencyNames = { "HKD":"港幣","JPY":"日圓","TWD":"台幣","USD":"美金","GBP":"英鎊","KRW":"韓圓" };
             const categories = [{ id:'attraction', icon:'fa-solid fa-camera' }, { id:'food', icon:'fa-solid fa-utensils' }, { id:'hotel', icon:'fa-solid fa-hotel' }, { id:'flight', icon:'fa-solid fa-plane' }, { id:'shopping', icon:'fa-solid fa-bag-shopping' }, { id:'transport', icon:'fa-solid fa-train' }];
             const form = vRef({});
@@ -240,19 +226,14 @@
                     const data = snap.val();
                     if(data) {
                         const rawArr = Array.isArray(data) ? data : Object.values(data);
-                        days.value = rawArr.map(d => ({ 
-                            ...d, 
-                            events: d.events ? (Array.isArray(d.events) ? d.events : Object.values(d.events)) : [] 
-                        }));
+                        days.value = rawArr.map(d => ({ ...d, events: d.events ? (Array.isArray(d.events) ? d.events : Object.values(d.events)) : [] }));
                     }
-                    fetchWeather();
                 });
-                onValue(packRef, snap => { if(snap.val()) packingList.value = Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val()); });
                 onValue(memberRef, snap => { if(snap.val()) members.value = Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val()); });
                 fetch('https://open.er-api.com/v6/latest/HKD').then(r => r.json()).then(d => rates.value = d.rates);
+                fetchWeather();
             });
 
-            // 核心渲染：保證陣列格式
             const computedEvents = computed(() => {
                 try {
                     const day = days.value[currentDayIdx.value];
@@ -262,14 +243,12 @@
             });
 
             const finishWizard = () => {
-                if(!config.value.dest || !config.value.startDate) return alert("請填寫資訊");
                 const start = new Date(config.value.startDate);
                 const end = new Date(config.value.endDate || config.value.startDate);
                 const diffDays = Math.ceil(Math.abs(end - start) / 86400000) + 1;
                 const newDays = Array.from({length: diffDays}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
-                const prePack = PRELOADED_PACKING.map(it => ({ id: Math.random(), text: it, done: false }));
-                days.value = newDays; packingList.value = prePack;
-                set(configRef, config.value); set(planRef, newDays); set(packRef, prePack); set(memberRef, members.value);
+                days.value = newDays;
+                set(configRef, config.value); set(planRef, newDays); set(memberRef, members.value);
                 isInitialized.value = true;
             };
 
@@ -282,7 +261,6 @@
             };
 
             const addMinutes = (t, m) => { let [h, min] = (t || "07:00").split(':').map(Number); let tot = h * 60 + min + m; return `${String(Math.floor(tot/60)%24).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`; };
-            const safeConvertToHKD = (amt, cur) => { try { return (parseFloat(amt || 0) / (rates.value[cur] || 1)).toFixed(1); } catch(e) { return 0; } };
             const save = () => set(planRef, JSON.parse(JSON.stringify(days.value)));
 
             const fetchWeather = async () => {
@@ -293,69 +271,51 @@
                 } catch(e) { weather.value.temp = '--'; }
             };
 
+            watch(currentDayIdx, fetchWeather);
+
             return { 
-                isInitialized, config, days, currentDayIdx, view, packingList, members, weather, showModal, editingIdx, form, currencyNames, categories, newMemberName, computedEvents,
-                finishWizard, autoReschedule, save, safeConvertToHKD,
+                isInitialized, config, days, currentDayIdx, view, members, weather, showModal, editingIdx, form, currencyNames, categories, newMemberName, computedEvents,
+                finishWizard, autoReschedule, save, 
                 getDayDate: (i) => { if (!config.value.startDate) return ''; let d = new Date(config.value.startDate); d.setDate(d.getDate() + i); return `${d.getDate()}/${d.getMonth() + 1}`; },
                 openAdd: () => {
                     const d = days.value[currentDayIdx.value];
                     let t = d ? d.startTime : '07:00';
-                    const evs = computedEvents.value;
-                    if(evs.length > 0) { const last = evs[evs.length-1]; t = addMinutes(last.time, (parseInt(last.duration)||0)+(parseInt(last.transTime)||0)); }
-                    form.value = { title:'', time:t, duration:60, transTime:0, category:'attraction', cost:0, currency:'HKD', note:'', url:'', phone:'', done:false, paidBy:'我', splitWith:[...members.value], id: Date.now() + Math.random() };
+                    if(computedEvents.value.length > 0) {
+                        const last = computedEvents.value[computedEvents.value.length-1];
+                        t = addMinutes(last.time, (parseInt(last.duration)||0)+(parseInt(last.transTime)||0));
+                    }
+                    form.value = { title:'', time:t, duration:60, transTime:0, category:'attraction', cost:0, currency:'HKD', note:'', url:'', phone:'', done:false, paidBy:members.value[0], splitWith:[...members.value], id: Date.now() + Math.random() };
                     showModal.value = true;
                 },
                 saveEvent: () => {
-                    // 🛡️ 修復：獲取目前最新陣列，確保不被覆蓋
-                    const day = days.value[currentDayIdx.value];
-                    if(!day.events) day.events = [];
-                    const currentList = Array.isArray(day.events) ? day.events : Object.values(day.events);
+                    // 🛡️ 核心修復：精確鎖定某一天，並強制陣列化
+                    const currentDay = days.value[currentDayIdx.value];
+                    if(!currentDay.events) currentDay.events = [];
+                    const currentList = Array.isArray(currentDay.events) ? currentDay.events : Object.values(currentDay.events);
                     
-                    if(editingIdx.value !== null) {
-                        currentList[editingIdx.value] = {...form.value};
-                    } else {
-                        currentList.push({...form.value});
-                    }
+                    if(editingIdx.value !== null) currentList[editingIdx.value] = {...form.value};
+                    else currentList.push({...form.value});
                     
-                    // 🛡️ 強制回填並更新
-                    day.events = [...currentList];
+                    // 🛡️ 重新賦值以觸發 Vue Reactivity
+                    currentDay.events = [...currentList];
                     showModal.value = false;
                     autoReschedule(); // 內含 save()
                 },
-                openEdit: (i) => { editingIdx.value = i; form.value = JSON.parse(JSON.stringify(computedEvents.value[i])); if(!Array.isArray(form.value.splitWith)) form.value.splitWith = [...members.value]; showModal.value = true; },
+                openEdit: (i) => { editingIdx.value = i; form.value = JSON.parse(JSON.stringify(computedEvents.value[i])); if(!form.value.splitWith) form.value.splitWith = [...members.value]; showModal.value = true; },
                 deleteEvent: () => { days.value[currentDayIdx.value].events.splice(editingIdx.value,1); autoReschedule(); showModal.value=false; },
                 addExtraDay: () => { days.value.push({events:[], city:config.value.dest, startTime:'07:00', id:Date.now()}); save(); },
+                toggleSplit: (m) => { if(!form.value.splitWith) form.value.splitWith = []; const idx = form.value.splitWith.indexOf(m); if(idx>-1) form.value.splitWith.splice(idx,1); else form.value.splitWith.push(m); },
                 addMember: () => { if(newMemberName.value) { members.value.push(newMemberName.value); newMemberName.value=''; set(memberRef, members.value); }},
                 removeMember: (i) => { members.value.splice(i,1); set(memberRef, members.value); },
-                toggleSplit: (m) => { if(!Array.isArray(form.value.splitWith)) form.value.splitWith = []; const idx = form.value.splitWith.indexOf(m); if(idx>-1) form.value.splitWith.splice(idx,1); else form.value.splitWith.push(m); },
-                togglePacking: (it) => { it.done = !it.done; set(packRef, packingList.value); },
                 getCatIcon: (id) => categories.find(c => c.id === id)?.icon || 'fa-solid fa-map-pin',
                 exportPDF: () => window.print(),
-                resetConfig: () => { if(confirm("重設將清空數據，確定嗎？")) { localStorage.clear(); set(configRef, null); location.reload(); } },
+                resetConfig: () => { if(confirm("重設行程？資料將清空。")) { localStorage.clear(); set(configRef, null); location.reload(); } },
+                safeConvertToHKD: (amt, cur) => (parseFloat(amt || 0) / (rates.value[cur] || 1)).toFixed(1),
                 dailyTotalHKD: computed(() => computedEvents.value.reduce((s, e) => s + (parseFloat(e.cost || 0) / (rates.value[e.currency] || 1)), 0).toFixed(0)),
                 grandTotalHKD: computed(() => days.value.reduce((total, day) => {
                     const evs = Array.isArray(day.events) ? day.events : Object.values(day.events || {});
                     return total + evs.reduce((s, e) => s + (parseFloat(e.cost || 0) / (rates.value[e.currency] || 1)), 0);
-                }, 0).toFixed(0)),
-                safeSettleReport: computed(() => {
-                    try {
-                        const bal = {}; members.value.forEach(m => bal[m] = 0);
-                        days.value.forEach(d => {
-                            const dayEvents = Array.isArray(d.events) ? d.events : Object.values(d.events || {});
-                            dayEvents.forEach(ev => {
-                                if (parseFloat(ev.cost||0) > 0 && ev.paidBy && Array.isArray(ev.splitWith) && ev.splitWith.length > 0) {
-                                    const amt = parseFloat(safeConvertToHKD(ev.cost, ev.currency));
-                                    bal[ev.paidBy] += amt;
-                                    ev.splitWith.forEach(m => { if(bal[m]!==undefined) bal[m] -= (amt / ev.splitWith.length); });
-                                }
-                            });
-                        });
-                        const res = []; const cr = []; const db = [];
-                        for(let m in bal) { if(bal[m]>0.1) cr.push({n:m, a:bal[m]}); else if(bal[m]<-0.1) db.push({n:m, a:-bal[m]}); }
-                        db.forEach(d => cr.forEach(c => { if(d.a>0 && c.a>0) { let p = Math.min(d.a, c.a); res.push({from:d.n, to:c.n, amount:p.toFixed(1)}); d.a-=p; c.a-=p; } }));
-                        return res;
-                    } catch(e) { return []; }
-                })
+                }, 0).toFixed(0))
             };
         }
     }).mount('#app');
