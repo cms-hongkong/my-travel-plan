@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Master Pro v39</title>
+    <title>Travel Master v40</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -15,20 +15,19 @@
         [v-cloak] { display: none; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 110px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        /* 初始化精靈 */
+        /* 初始精靈 */
         .wizard-overlay { position: fixed; inset: 0; background: var(--card); z-index: 5000; padding: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
-        .wizard-content { width: 100%; max-width: 350px; text-align: center; }
-        .wizard-input { border: 1.5px solid var(--divider); border-radius: 12px; font-size: 16px; padding: 15px; width: 100%; box-sizing: border-box; margin-bottom: 15px; background: var(--bg); outline: none; }
-        .wizard-btn { background: var(--primary); color: white; padding: 18px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; }
+        .wizard-input { border: 1.5px solid var(--divider); border-radius: 12px; font-size: 16px; padding: 15px; width: 100%; max-width: 350px; margin-bottom: 15px; background: var(--bg); outline: none; }
+        .wizard-btn { background: var(--primary); color: white; padding: 18px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; width: 100%; max-width: 350px; cursor: pointer; }
 
         /* 導航 */
         .header { background: var(--card); padding-top: 10px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--divider); }
-        .nav-switch { display: flex; padding: 10px 15px; gap: 5px; overflow-x: auto; }
-        .nav-btn { flex: 1; border: none; padding: 10px 5px; border-radius: 8px; cursor: pointer; background: var(--bg); color: var(--secondary); font-weight: bold; font-size: 12px; white-space: nowrap; transition: 0.3s; }
+        .nav-switch { display: flex; padding: 10px 15px; gap: 5px; }
+        .nav-btn { flex: 1; border: none; padding: 10px 5px; border-radius: 8px; cursor: pointer; background: var(--bg); color: var(--secondary); font-weight: bold; font-size: 12px; }
         .nav-btn.active { background: var(--primary); color: white; }
 
-        /* 橫向日期選單 */
-        .day-tabs-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        /* 橫向日期滑動 */
+        .day-tabs-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 10px 15px; scrollbar-width: none; }
         .day-tabs-wrapper::-webkit-scrollbar { display: none; }
         .day-tab { flex: 0 0 75px; display: flex; flex-direction: column; align-items: center; padding: 12px 0; border-radius: 15px; background: var(--bg); cursor: pointer; border: 1.5px solid transparent; }
         .day-tab.active { background: var(--primary-light); border-color: var(--primary); }
@@ -38,43 +37,42 @@
         /* 卡片設計 */
         .card { background: var(--card); border-radius: 20px; padding: 18px; margin: 10px 15px; border: 1px solid var(--divider); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .event-card { display: flex; gap: 12px; align-items: flex-start; }
-        .event-card.is-done { opacity: 0.5; }
         .handle { width: 38px; height: 38px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); cursor: grab; flex-shrink: 0; }
         
         .card-main { flex: 1; min-width: 0; }
         .card-title { font-weight: 700; font-size: 16px; color: var(--text); }
         .card-meta { font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
         
-        /* 拆分欄位顯示 */
+        /* 拆分欄位 */
         .card-info-box { font-size: 12px; margin-top: 8px; border-top: 1px solid var(--divider); padding-top: 8px; color: #546E7A; }
         .info-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .info-item a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .card-photo { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--divider); display: block; }
+        .info-item a { color: var(--primary); font-weight: 600; text-decoration: none; }
+        .card-photo { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--divider); }
 
         .transport-divider { margin: -5px 0 12px 65px; border-left: 2px dashed var(--primary-light); padding: 5px 15px; font-size: 11px; color: var(--secondary); }
 
         /* 標籤按鈕 */
-        .chip { display: inline-block; padding: 4px 12px; background: var(--bg); border-radius: 15px; font-size: 11px; margin: 2px; border: 1px solid transparent; cursor: pointer; }
-        .chip.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .chip { display: inline-block; padding: 5px 12px; background: var(--bg); border-radius: 15px; font-size: 11px; margin: 3px; border: 1px solid transparent; cursor: pointer; }
+        .chip.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); font-weight: bold; }
 
         .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
-        .icon-opt { aspect-ratio: 1; border: 2px solid var(--divider); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--secondary); background: var(--bg); }
-        .icon-opt.selected-logo { background: var(--primary) !important; color: white !important; border-color: var(--primary) !important; }
+        .icon-opt { aspect-ratio: 1; border: 2.5px solid var(--divider); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--secondary); background: var(--bg); }
+        .icon-opt.selected-logo { background: var(--primary-light) !important; color: var(--primary) !important; border-color: var(--primary) !important; transform: scale(1.1); }
 
         /* 彈窗 */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
         .modal-body { background: var(--card); width: 100%; max-width: 420px; padding: 20px; border-radius: 25px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
-        label { font-size: 11px; font-weight: 800; color: var(--secondary); margin-bottom: 5px; display: block; text-transform: uppercase; }
-        input, select, textarea { font-size: 16px; padding: 10px; width: 100%; box-sizing: border-box; border: 1.5px solid var(--divider); border-radius: 10px; margin-bottom: 12px; background: var(--bg); outline: none; }
+        input, select, textarea { font-size: 16px; padding: 12px; width: 100%; box-sizing: border-box; border: 1.5px solid var(--divider); border-radius: 10px; margin-bottom: 12px; background: var(--bg); outline: none; }
+        label { font-size: 11px; font-weight: 800; color: var(--secondary); margin-bottom: 5px; display: block; }
         
         .footer { position: fixed; bottom: 20px; left: 15px; right: 15px; display: flex; gap: 10px; z-index: 1000; }
         .btn { flex: 1; padding: 16px; border-radius: 18px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); box-shadow: 0 8px 20px rgba(77,182,172,0.3); }
-        .btn-secondary { background: #5856D6; flex: 0.3; }
+        .btn-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); flex: 0.3; }
 
-        .packing-category { font-size: 12px; font-weight: 800; color: var(--primary); margin: 20px 15px 5px 15px; }
+        .packing-category { font-size: 12px; font-weight: 800; color: var(--primary); margin: 20px 15px 5px 15px; border-left: 3px solid var(--primary); padding-left: 10px; }
 
-        @media print { .header, .footer, .nav-switch, .fa-location-arrow { display: none !important; } }
+        @media print { .header, .footer, .nav-switch { display: none !important; } .card { break-inside: avoid; } }
     </style>
 </head>
 <body>
@@ -83,14 +81,14 @@
     <div v-if="!isInitialized" class="wizard-overlay">
         <div class="wizard-content">
             <i class="fa-solid fa-earth-asia" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
-            <h2>開始新的探險</h2>
-            <p style="color: var(--secondary); margin-bottom: 30px; font-size: 14px;">填寫資訊以生成自動行程表</p>
+            <h2 style="margin-bottom: 10px;">Travel Master v40</h2>
+            <p style="color: var(--secondary); margin-bottom: 30px; font-size: 14px;">設定您的目的地與日期以生成公版</p>
             <input v-model="config.dest" class="wizard-input" placeholder="目的地 (例如: Tokyo)">
-            <label style="font-size: 11px; font-weight: 700; text-align: left; display: block;">出發日期</label>
+            <label style="font-weight: 700;">出發日期</label>
             <input type="date" v-model="config.startDate" class="wizard-input">
-            <label style="font-size: 11px; font-weight: 700; text-align: left; display: block;">回程日期</label>
+            <label style="font-weight: 700;">回程日期</label>
             <input type="date" v-model="config.endDate" class="wizard-input">
-            <button class="wizard-btn" @click="finishWizard">生成我的專屬行程表</button>
+            <button class="wizard-btn" @click="finishWizard">生成我的行程表</button>
         </div>
     </div>
 
@@ -114,7 +112,7 @@
         </div>
     </div>
 
-    <div v-if="view === 'plan' && isInitialized && days[currentDayIdx]">
+    <div v-if="view === 'plan' && isInitialized">
         <div class="card" style="padding: 15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -125,7 +123,7 @@
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <label>今日總預算</label>
+                    <label>今日支出小計</label>
                     <div style="font-weight:700; color:var(--accent);">HKD ${{ dailyTotalHKD }}</div>
                 </div>
             </div>
@@ -135,7 +133,7 @@
             <v-draggable v-model="days[currentDayIdx].events" item-key="id" handle=".handle" @end="autoReschedule" :animation="200">
                 <template #item="{element, index}">
                     <div>
-                        <div class="card event-card" :class="{'is-done': element.done}">
+                        <div class="card event-card">
                             <div @click.stop="element.done = !element.done; save()" style="padding-top: 5px; cursor:pointer;">
                                 <i :class="element.done ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'" :style="{color: element.done ? 'var(--primary)' : '#CFD8DC', fontSize:'24px'}"></i>
                             </div>
@@ -143,16 +141,15 @@
                                 <i :class="getCatIcon(element.category)" style="font-size: 18px;"></i>
                             </div>
                             <div class="card-main" @click="openEdit(index)">
-                                <span class="card-title">{{ element.title || '新行程' }}</span>
+                                <span class="card-title">{{ element.title || '未命名行程' }}</span>
                                 <div class="card-meta">
                                     <span style="color:var(--primary); font-weight:800;">{{ element.time }}</span>
                                     <span v-if="element.cost > 0" style="color:var(--accent);">💰 ${{ safeConvertToHKD(element.cost, element.currency) }}</span>
-                                    <span v-if="element.paidBy" style="background:#F2F2F7; padding:1px 5px; border-radius:4px;">{{ element.paidBy }} 付</span>
+                                    <span v-if="element.paidBy" style="background:#F2F2F7; padding:2px 6px; border-radius:4px;">{{ element.paidBy }} 付</span>
                                 </div>
-                                
                                 <div class="card-info-box" v-if="element.note || element.url || element.phone">
-                                    <div v-if="element.note" style="white-space:pre-wrap; margin-bottom:5px;">{{ element.note }}</div>
-                                    <div v-if="element.url" class="info-item"><i class="fa-solid fa-link"></i> <a :href="element.url" target="_blank">資訊網址</a></div>
+                                    <div v-if="element.note" style="margin-bottom:5px; white-space:pre-wrap;">{{ element.note }}</div>
+                                    <div v-if="element.url" class="info-item"><i class="fa-solid fa-link"></i> <a :href="element.url" target="_blank">查看網址</a></div>
                                     <div v-if="element.phone" class="info-item"><i class="fa-solid fa-phone"></i> {{ element.phone }}</div>
                                 </div>
                                 <img v-if="element.photo" :src="element.photo" class="card-photo">
@@ -173,21 +170,24 @@
             <div style="font-size: 32px; font-weight: 800;">HKD ${{ grandTotalHKD }}</div>
         </div>
         
-        <h4 style="margin: 20px 0 10px 15px;">📊 結算報告 (Settle Up)</h4>
-        <div class="card" v-for="res in settleReport">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 style="margin: 25px 0 10px 15px;"><i class="fa-solid fa-calculator"></i> 結算報告 (Settle Up)</h4>
+        <div class="card" style="padding: 10px;">
+            <div v-if="settleReport.length === 0" style="text-align:center; padding:20px; color:var(--secondary);">
+                ✅ 目前帳目已清，無人欠款
+            </div>
+            <div v-for="res in settleReport" style="display:flex; justify-content:space-between; align-items:center; padding: 12px; border-bottom: 1px solid var(--divider);">
                 <span style="font-size: 14px;"><b>{{ res.from }}</b> ➡️ <b>{{ res.to }}</b></span>
                 <span style="color:var(--primary); font-weight:bold;">HKD ${{ res.amount }}</span>
             </div>
         </div>
 
-        <h4 style="margin: 20px 0 10px 15px;">🧾 支出明細</h4>
-        <div v-for="(day, idx) in days" :key="idx" class="card" v-if="hasValidExpenses(idx)">
-            <div style="font-weight: 700; border-bottom: 1px solid var(--divider); padding-bottom: 8px; margin-bottom: 10px; color: var(--primary);">Day {{ idx + 1 }}</div>
-            <div v-for="ev in day.events" :key="ev.id">
-                <div v-if="parseFloat(ev.cost || 0) > 0" style="display:flex; justify-content:space-between; font-size: 13px; margin-bottom: 8px;">
+        <h4 style="margin: 25px 0 10px 15px;"><i class="fa-solid fa-receipt"></i> 支出明細</h4>
+        <div v-for="(day, idx) in days" :key="idx" v-if="hasValidExpenses(idx)">
+            <div class="card" style="margin-bottom:10px; padding: 15px;">
+                <div style="font-weight: 700; color: var(--primary); margin-bottom:10px;">Day {{ idx + 1 }} ({{ getDayDate(idx) }})</div>
+                <div v-for="ev in day.events" v-if="parseFloat(ev.cost || 0) > 0" style="display:flex; justify-content:space-between; font-size: 13px; margin-bottom: 8px;">
                     <span style="flex:1;">{{ ev.title }} ({{ ev.paidBy }})</span>
-                    <span style="color:var(--accent);">{{ ev.cost }} {{ ev.currency }} ≈ ${{ safeConvertToHKD(ev.cost, ev.currency) }}</span>
+                    <span style="font-weight:600;">{{ ev.cost }} {{ ev.currency }} ≈ ${{ safeConvertToHKD(ev.cost, ev.currency) }}</span>
                 </div>
             </div>
         </div>
@@ -195,25 +195,30 @@
 
     <div v-if="view === 'member'" style="padding: 15px;">
         <div class="card">
-            <h3>👥 旅伴成員管理</h3>
+            <h3>👥 旅伴成員</h3>
             <div v-for="(m, i) in members" :key="i" style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--divider);">
                 <span>{{ m }}</span>
-                <i class="fa-solid fa-circle-xmark" @click="removeMember(i)" style="color:#FFAB91; cursor:pointer;"></i>
+                <i class="fa-solid fa-circle-xmark" @click="removeMember(i)" style="color:#FFAB91; cursor:pointer;" v-if="m !== '我'"></i>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <input v-model="newMemberName" placeholder="成員名字" style="margin:0;">
-                <button @click="addMember" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:12px;">＋</button>
+                <input v-model="newMemberName" placeholder="新增旅伴姓名" style="margin:0;">
+                <button @click="addMember" style="background:var(--primary); color:white; border:none; padding:10px 18px; border-radius:12px; font-weight:bold;">＋</button>
             </div>
         </div>
     </div>
 
     <div v-if="view === 'pack'" style="padding: 15px;">
-        <div v-for="(group, catName) in groupedPacking" :key="catName">
+        <div v-for="(category, catName) in groupedPacking" :key="catName">
             <div class="packing-category">{{ catName }}</div>
-            <div v-for="item in group" :key="item.id" class="card" style="padding:15px; margin:0 0 10px 0; display:flex; align-items:center;">
+            <div v-for="item in category" :key="item.id" class="card" style="padding:15px; margin:0 0 10px 0; display:flex; align-items:center;">
                 <i @click="togglePacking(item)" :class="item.done ? 'fa-solid fa-square-check' : 'fa-regular fa-square'" :style="{color: item.done ? 'var(--primary)' : '#CFD8DC', fontSize:'24px', marginRight:'15px'}"></i>
                 <span :style="{flex:1, textDecoration: item.done ? 'line-through' : 'none'}">{{ item.text }}</span>
+                <i class="fa-solid fa-trash" @click="removePackingItem(item.id)" style="color:#FFAB91; opacity:0.6;"></i>
             </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:30px;">
+            <input v-model="newItemText" placeholder="手動新增項目..." style="margin:0;">
+            <button @click="addManualPacking" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:bold;">＋</button>
         </div>
     </div>
 
@@ -224,7 +229,7 @@
 
     <div v-if="showModal" class="modal" @click.self="showModal = false">
         <div class="modal-body">
-            <h3>項目詳情</h3>
+            <h3 style="margin:0 0 15px 0;">項目詳情</h3>
             
             <label>1. 分類圖標</label>
             <div class="icon-grid">
@@ -240,20 +245,22 @@
                 <div style="flex:1"><label>停留(分)</label><input type="number" v-model="form.duration"></div>
             </div>
 
-            <label>3. 聯絡與資訊</label>
-            <input v-model="form.url" placeholder="網址 (景點官網/地圖)">
+            <label>3. 聯絡資訊與網址</label>
+            <input v-model="form.url" placeholder="網址 (景點/預約網頁)">
             <input v-model="form.phone" placeholder="電話號碼">
-            <textarea v-model="form.note" rows="2" placeholder="備註內容..."></textarea>
+            <textarea v-model="form.note" rows="2" placeholder="詳細備註內容..."></textarea>
 
-            <label>4. 參考相片</label>
-            <input type="file" @change="uploadPhoto" accept="image/*" style="font-size: 11px; border:none; background:none; padding:0;">
+            <label>4. 參考相片 (地圖/憑證截圖)</label>
+            <input type="file" @change="uploadPhoto" accept="image/*" style="font-size:11px; margin-bottom:5px;">
             <img v-if="form.photo" :src="form.photo" style="width:100%; border-radius:10px; margin-bottom:15px;">
 
             <label>5. 費用與拆帳</label>
             <div style="background:var(--bg); padding:15px; border-radius:15px; margin-bottom:15px;">
-                <small>付款人：</small><select v-model="form.paidBy" style="padding:5px; margin-bottom:10px;"><option v-for="m in members" :value="m">{{m}}</option></select>
-                <div><small>分擔對象：</small></div>
-                <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">
+                <div style="margin-bottom:10px;">
+                    <small>付款人：</small><select v-model="form.paidBy" style="padding:5px; margin:0; width:100px;"><option v-for="m in members" :value="m">{{m}}</option></select>
+                </div>
+                <small>誰分擔這筆數？ (點擊選取)</small>
+                <div style="display:flex; flex-wrap:wrap; margin-top:5px;">
                     <span v-for="m in members" @click="toggleSplit(m)" :class="['chip', form.splitWith.includes(m) ? 'active' : '']">{{m}}</span>
                 </div>
                 <div style="display:flex; gap:8px; margin-top:15px;">
@@ -261,7 +268,7 @@
                     <select v-model="form.currency" style="flex:1; margin:0;"><option v-for="(n, c) in currencyNames" :value="c">{{n}}</option></select>
                 </div>
             </div>
-            <button class="btn btn-primary" style="width:100%;" @click="saveEvent">儲存項目</button>
+            <button class="btn btn-primary" style="width:100%;" @click="saveEvent">確認並儲存</button>
             <div v-if="editingIdx !== null" @click="deleteEvent" style="color:red; text-align:center; margin-top:15px; font-size:13px; cursor:pointer;">🗑️ 刪除行程</div>
         </div>
     </div>
@@ -283,19 +290,20 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    // 💡 升級路徑，確保資料結構兼容
-    const planRef = ref(db, 'planner_pro_v39_final');
-    const configRef = ref(db, 'config_v39');
-    const packRef = ref(db, 'packing_list_v39');
-    const memberRef = ref(db, 'members_v39');
+    const planRef = ref(db, 'planner_pro_v40');
+    const configRef = ref(db, 'config_v40');
+    const packRef = ref(db, 'packing_list_v40');
+    const memberRef = ref(db, 'members_v40');
 
-    const { createApp, ref: vRef, onMounted, computed, watch } = Vue;
+    const { createApp, ref: vRef, onMounted, computed, watch, nextTick } = Vue;
 
-    const DEFAULT_PACKING = [
-        { cat: "重要文件與財物", items: ["錢包", "信用卡", "身分證", "護照", "行程表", "SIM 卡"] },
-        { cat: "攝影器材", items: ["相機", "Insta360", "充電器"] },
-        { cat: "電子產品", items: ["手機", "尿袋", "萬用插頭"] },
-        { cat: "衣物穿戴", items: ["內衣褲", "襪子", "外套", "睡衣"] }
+    const PRELOADED_PACKING = [
+        { cat: "重要文件與財物", items: ["錢包", "信用卡", "身分證", "護照", "SIM 卡", "行程表", "保險單"] },
+        { cat: "攝影與電子", items: ["FIMI 相機", "Insta360", "航拍機", "手機充電線", "iPad", "行動電源", "萬用插頭"] },
+        { cat: "沐浴與個人護理", items: ["浴巾", "牙膏牙刷", "護膚品", "防曬乳", "剃鬚刀", "風筒"] },
+        { cat: "衣物穿戴", items: ["外套", "褲子", "內衣褲", "襪子", "睡衣", "運動服"] },
+        { cat: "醫藥衛生", items: ["常用藥", "口罩", "消毒濕紙巾"] },
+        { cat: "其他用品", items: ["雨傘", "熱水壺", "行李秤", "零食"] }
     ];
 
     createApp({
@@ -314,23 +322,30 @@
             const currencyNames = { "HKD":"港幣","JPY":"日圓","TWD":"台幣","USD":"美金","GBP":"英鎊","KRW":"韓圓" };
             const categories = [{ id:'attraction', icon:'fa-solid fa-camera' }, { id:'food', icon:'fa-solid fa-utensils' }, { id:'hotel', icon:'fa-solid fa-hotel' }, { id:'flight', icon:'fa-solid fa-plane' }, { id:'shopping', icon:'fa-solid fa-bag-shopping' }, { id:'transport', icon:'fa-solid fa-train' }];
             const form = vRef({});
+            const newItemText = vRef('');
+            const newMemberName = vRef('');
 
             onMounted(() => {
                 onValue(configRef, snap => { if(snap.val()) { config.value = snap.val(); isInitialized.value = true; } });
-                onValue(planRef, snap => { if(snap.val()) days.value = snap.val(); fetchWeather(); });
+                onValue(planRef, snap => { 
+                    const data = snap.val();
+                    if(data) days.value = Array.isArray(data) ? data : Object.values(data);
+                    fetchWeather();
+                });
                 onValue(packRef, snap => { if(snap.val()) packingList.value = snap.val(); });
                 onValue(memberRef, snap => { if(snap.val()) members.value = snap.val(); });
                 fetch('https://open.er-api.com/v6/latest/HKD').then(r => r.json()).then(d => rates.value = d.rates);
             });
 
             const finishWizard = () => {
+                if(!config.value.dest || !config.value.startDate) return alert("請填寫資訊");
                 const start = new Date(config.value.startDate);
                 const end = new Date(config.value.endDate);
-                const diff = Math.ceil(Math.abs(end - start) / 86400000) + 1;
-                const newDays = Array.from({length: diff}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
-                const prePack = []; DEFAULT_PACKING.forEach(g => g.items.forEach(it => prePack.push({ id: Math.random(), category: g.cat, text: it, done: false })));
+                const diffDays = Math.ceil(Math.abs(end - start) / 86400000) + 1;
+                const newDays = Array.from({length: diffDays}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
+                const prePack = []; PRELOADED_PACKING.forEach(g => g.items.forEach(it => prePack.push({ id: Math.random(), category: g.cat, text: it, done: false })));
                 days.value = newDays; packingList.value = prePack;
-                set(configRef, config.value); set(planRef, newDays); set(packRef, prePack);
+                set(configRef, config.value); set(planRef, newDays); set(packRef, prePack); set(memberRef, members.value);
                 isInitialized.value = true;
             };
 
@@ -338,7 +353,7 @@
                 const day = days.value[currentDayIdx.value]; if (!day || !day.events) return;
                 let cur = day.startTime || '07:00';
                 day.events.forEach(ev => { ev.time = cur; cur = addMinutes(cur, (parseInt(ev.duration)||0)+(parseInt(ev.transTime)||0)); });
-                save();
+                set(planRef, JSON.parse(JSON.stringify(days.value)));
             };
 
             const addMinutes = (t, m) => { let [h, min] = t.split(':').map(Number); let tot = h * 60 + min + m; return `${String(Math.floor(tot/60)%24).padStart(2,'0')}:${String(tot%60).padStart(2,'0')}`; };
@@ -352,12 +367,9 @@
                 } catch(e) { weather.value.temp = '--'; }
             };
 
-            const save = () => set(planRef, JSON.parse(JSON.stringify(days.value)));
-
             return { 
-                isInitialized, config, days, currentDayIdx, view, packingList, members, weather, showModal, editingIdx, form, currencyNames, categories,
-                finishWizard, autoReschedule, save, 
-                getDayDate: (idx) => { if (!config.value.startDate) return ''; let d = new Date(config.value.startDate); d.setDate(d.getDate() + idx); return `${d.getDate()}/${d.getMonth() + 1}`; },
+                isInitialized, config, days, currentDayIdx, view, packingList, members, weather, showModal, editingIdx, form, currencyNames, categories, newItemText, newMemberName, rates,
+                finishWizard, autoReschedule, getDayDate: (i) => { if (!config.value.startDate) return ''; let d = new Date(config.value.startDate); d.setDate(d.getDate() + i); return `${d.getDate()}/${d.getMonth() + 1}`; },
                 openAdd: () => {
                     const d = days.value[currentDayIdx.value];
                     let t = d.startTime || '07:00';
@@ -366,38 +378,43 @@
                     showModal.value = true;
                 },
                 saveEvent: () => {
-                    const dIdx = currentDayIdx.value;
-                    if(!days.value[dIdx].events) days.value[dIdx].events = [];
-                    if(editingIdx.value !== null) days.value[dIdx].events[editingIdx.value] = {...form.value};
-                    else days.value[dIdx].events.push({...form.value});
+                    if(!days.value[currentDayIdx.value].events) days.value[currentDayIdx.value].events = [];
+                    if(editingIdx.value !== null) days.value[currentDayIdx.value].events[editingIdx.value] = {...form.value};
+                    else days.value[currentDayIdx.value].events.push({...form.value});
                     showModal.value = false; autoReschedule();
                 },
-                openEdit: (i) => { editingIdx.value = i; form.value = JSON.parse(JSON.stringify(days.value[currentDayIdx.value].events[i])); showModal.value = true; },
+                openEdit: (i) => { editingIdx.value = i; form.value = JSON.parse(JSON.stringify(days.value[currentDayIdx.value].events[i])); if(!form.value.splitWith) form.value.splitWith = [...members.value]; showModal.value = true; },
                 deleteEvent: () => { days.value[currentDayIdx.value].events.splice(editingIdx.value,1); autoReschedule(); showModal.value=false; },
                 uploadPhoto: (e) => { const f = e.target.files[0]; const r = new FileReader(); r.onloadend = () => { form.value.photo = r.result; }; if(f) r.readAsDataURL(f); },
                 toggleSplit: (m) => { const idx = form.value.splitWith.indexOf(m); if(idx>-1) form.value.splitWith.splice(idx,1); else form.value.splitWith.push(m); },
-                addMember: () => { if(confirm("新增成員？")) { members.value.push("新成員"); set(memberRef, members.value); }}, // 簡化邏輯
+                addMember: () => { if(newMemberName.value) { members.value.push(newMemberName.value); newMemberName.value=''; set(memberRef, members.value); }},
+                removeMember: (i) => { members.value.splice(i,1); set(memberRef, members.value); },
+                togglePacking: (it) => { it.done = !it.done; set(packRef, packingList.value); },
+                removePackingItem: (id) => { packingList.value = packingList.value.filter(x=>x.id!==id); set(packRef, packingList.value); },
+                addManualPacking: () => { if(newItemText.value) { packingList.value.push({id:Math.random(), category:'自定義', text:newItemText.value, done:false}); newItemText.value=''; set(packRef, packingList.value); }},
                 getCatIcon: (id) => categories.find(c => c.id === id)?.icon || 'fa-solid fa-map-pin',
-                getHKTime: (t) => t, 
                 exportPDF: () => window.print(),
-                resetConfig: () => { if(confirm("確定重設？")) { set(configRef, null); location.reload(); } },
+                resetConfig: () => { if(confirm("重設將清空所有數據，確定嗎？")) { set(configRef, null); location.reload(); } },
+                save: () => set(planRef, JSON.parse(JSON.stringify(days.value))),
                 dailyTotalHKD: computed(() => (days.value[currentDayIdx.value]?.events || []).reduce((s, e) => s + parseFloat(e.cost || 0) / (rates.value[e.currency] || 1), 0).toFixed(0)),
                 grandTotalHKD: computed(() => days.value.reduce((t, d) => t + (d.events || []).reduce((s, e) => s + parseFloat(e.cost || 0) / (rates.value[e.currency] || 1), 0), 0).toFixed(0)),
+                statsText: computed(() => { const evs = days.value[currentDayIdx.value]?.events || []; return `${evs.filter(e=>e.done).length}/${evs.length} 完成`; }),
+                groupedPacking: computed(() => { const g = {}; packingList.value.forEach(it => { if(!g[it.category]) g[it.category] = []; g[it.category].push(it); }); return g; }),
+                hasValidExpenses: (idx) => (days.value[idx]?.events || []).some(e => parseFloat(e.cost||0) > 0),
                 settleReport: computed(() => {
                     const bal = {}; members.value.forEach(m => bal[m] = 0);
                     days.value.forEach(d => (d.events || []).forEach(ev => {
                         if (parseFloat(ev.cost||0) > 0 && ev.paidBy && ev.splitWith?.length > 0) {
                             const amt = parseFloat(safeConvertToHKD(ev.cost, ev.currency));
-                            bal[ev.paidBy] += amt; ev.splitWith.forEach(m => { if(bal[m]!==undefined) bal[m] -= (amt / ev.splitWith.length); });
+                            bal[ev.paidBy] += amt;
+                            ev.splitWith.forEach(m => { if(bal[m]!==undefined) bal[m] -= (amt / ev.splitWith.length); });
                         }
                     }));
                     const res = []; const cr = []; const db = [];
                     for(let m in bal) { if(bal[m]>0.1) cr.push({n:m, a:bal[m]}); else if(bal[m]<-0.1) db.push({n:m, a:-bal[m]}); }
                     db.forEach(d => cr.forEach(c => { if(d.a>0 && c.a>0) { let p = Math.min(d.a, c.a); res.push({from:d.n, to:c.n, amount:p.toFixed(1)}); d.a-=p; c.a-=p; } }));
                     return res;
-                }),
-                groupedPacking: computed(() => { const g = {}; packingList.value.forEach(it => { if(!g[it.category]) g[it.category] = []; g[it.category].push(it); }); return g; }),
-                hasValidExpenses: (idx) => (days.value[idx]?.events || []).some(e => parseFloat(e.cost||0) > 0)
+                })
             };
         }
     }).mount('#app');
