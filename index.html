@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Master v63 - Full Gear</title>
+    <title>Travel Master v63 - Full Gear (Pro Print)</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -62,11 +62,14 @@
         .chip { display: inline-block; padding: 6px 14px; background: var(--bg); border-radius: 20px; font-size: 12px; margin: 3px; cursor: pointer; border: 1.5px solid transparent; transition: 0.2s; }
         .chip.active { background: var(--primary-light); color: var(--primary); font-weight: bold; border-color: var(--primary); }
 
+        /* 列印專屬優化 */
+        .print-only-header { display: none; }
         @media print {
-            .header, .footer, #forceReset, .nav-switch, .fa-location-arrow, .btn-transit { display: none !important; }
+            .header, .footer, #forceReset, .nav-switch, .fa-location-arrow, .btn-transit, .day-tabs-wrapper { display: none !important; }
+            .print-only-header { display: block; margin: 0 15px 15px 15px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
             .card { box-shadow: none !important; border: 1px solid #eee !important; break-inside: avoid; margin: 10px 0 !important; width: 100% !important; }
             .handle { display: none !important; }
-            body { background: white; padding: 20px; }
+            body { background: white; padding: 10px; }
         }
     </style>
 </head>
@@ -110,6 +113,11 @@
     </div>
 
     <div v-if="view === 'plan' && isInitialized">
+        <div class="print-only-header">
+            <h1 style="margin:0; color:var(--primary); font-size: 24px;">{{ config.dest }} - Day {{ currentDayIdx + 1 }}</h1>
+            <div style="font-weight: bold; font-size: 16px;">日期：{{ getDayDate(currentDayIdx) }}</div>
+        </div>
+
         <div class="card" style="padding: 15px; margin-bottom: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div v-if="days[currentDayIdx]">
@@ -284,7 +292,7 @@
     const memberRef = ref(db, 'members_v63');
     const packRef = ref(db, 'packing_v63');
 
-    const { createApp, ref: vRef, onMounted, computed, watch, triggerRef } = Vue;
+    const { createApp, ref: vRef, onMounted, computed, watch } = Vue;
 
     const PRELOADED_PACKING = [
         { cat: "1. 重要文件與財物", items: ["錢包 (本地 / 外幣)", "信用卡", "身分證", "護照 / 簽證", "駕駛執照 (本地 / 國際)", "旅遊保險", "行程表", "登機證", "酒店預約確認", "住址證明", "藥物過敏紀錄", "SIM 卡", "海外提款功能"] },
@@ -350,7 +358,6 @@
                 const diffDays = Math.ceil(Math.abs(end - start) / 86400000) + 1;
                 const newDays = Array.from({length: diffDays}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
                 
-                // 🌟 行李清單全面注入
                 const prePack = []; 
                 PRELOADED_PACKING.forEach(g => g.items.forEach(it => prePack.push({ id: Math.random(), category: g.cat, text: it, done: false })));
                 
@@ -383,7 +390,14 @@
             return { 
                 isInitialized, config, days, currentDayIdx, view, members, weather, showModal, editingIdx, form, currencyNames, categories, computedEvents, packingList, newMemberName,
                 finishWizard, autoReschedule, save, 
-                getDayDate: (i) => { if (!config.value.startDate) return ''; let d = new Date(config.value.startDate); d.setDate(d.getDate() + i); return `${d.getDate()}/${d.getMonth() + 1}`; },
+                // 新增：顯示日期 + 星期幾
+                getDayDate: (i) => { 
+                    if (!config.value.startDate) return ''; 
+                    let d = new Date(config.value.startDate); 
+                    d.setDate(d.getDate() + i); 
+                    const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+                    return `${d.getMonth() + 1}/${d.getDate()} (週${weekNames[d.getDay()]})`; 
+                },
                 openAdd: () => {
                     const d = days.value[currentDayIdx.value];
                     let t = d ? d.startTime : '07:00';
