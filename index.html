@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Travel Master v56</title>
+    <title>Travel Master Pro v57</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -14,14 +14,14 @@
         [v-cloak] { display: none; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 150px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* 1. 初始精靈 - 加入明確日期提示 */
+        /* 初始精靈 */
         .wizard-overlay { position: fixed; inset: 0; background: var(--card); z-index: 5000; padding: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; }
         .wizard-content { width: 100%; max-width: 350px; text-align: center; }
         .wizard-label { display: block; text-align: left; font-size: 12px; font-weight: 800; color: var(--primary); margin-bottom: 5px; margin-top: 10px; }
         .wizard-input { border: 1.5px solid var(--divider); border-radius: 12px; font-size: 16px; padding: 15px; width: 100%; box-sizing: border-box; margin-bottom: 10px; background: var(--bg); outline: none; }
         .wizard-btn { background: var(--primary); color: white; padding: 18px; border-radius: 30px; border: none; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 20px; }
 
-        /* 導航 */
+        /* Header */
         .header { background: var(--card); padding-top: 10px; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--divider); }
         .nav-switch { display: flex; padding: 10px 15px; gap: 5px; }
         .nav-btn { flex: 1; border: none; padding: 10px 2px; border-radius: 8px; cursor: pointer; background: var(--bg); color: var(--secondary); font-weight: bold; font-size: 12px; }
@@ -30,60 +30,55 @@
         .day-tab { flex: 0 0 75px; display: flex; flex-direction: column; align-items: center; padding: 12px 0; border-radius: 15px; background: var(--bg); cursor: pointer; border: 1.5px solid transparent; }
         .day-tab.active { background: var(--primary-light); border-color: var(--primary); }
 
-        /* 卡片與拖拉 */
+        /* 行程卡片 */
         .card { background: var(--card); border-radius: 20px; padding: 18px; margin: 10px 15px; border: 1px solid var(--divider); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .event-card { display: flex; gap: 12px; align-items: flex-start; cursor: default; }
+        .event-card { display: flex; gap: 12px; align-items: flex-start; }
         .handle { width: 38px; height: 38px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); cursor: grab; flex-shrink: 0; font-size: 18px; }
         .card-main { flex: 1; min-width: 0; }
         .card-title { font-weight: 700; font-size: 16px; color: var(--text); }
         .card-meta { font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 8px; margin-top: 4px; }
         .info-box { font-size: 12px; color: #546E7A; background: var(--bg); padding: 10px; border-radius: 10px; margin-top: 10px; white-space: pre-wrap; border-left: 3px solid var(--primary); }
-        .transport-divider { margin: -5px 0 12px 65px; border-left: 2px dashed var(--primary-light); padding: 5px 15px; font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .card-link { color: var(--primary); font-weight: bold; text-decoration: none; display: inline-block; margin-top: 5px; font-size: 11px; }
 
-        /* 彈窗 */
+        /* 彈窗樣式 */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
         .modal-body { background: var(--card); width: 100%; max-width: 420px; padding: 20px; border-radius: 25px; max-height: 90vh; overflow-y: auto; }
-        input, select, textarea { font-size: 16px; padding: 10px; width: 100%; box-sizing: border-box; border: 1.5px solid var(--divider); border-radius: 10px; margin-bottom: 12px; background: var(--bg); outline: none; }
+        .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+        .icon-opt { aspect-ratio: 1; border: 2.5px solid var(--divider); border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--secondary); }
+        .icon-opt.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
         .footer { position: fixed; bottom: 20px; left: 15px; right: 15px; display: flex; gap: 10px; z-index: 1000; }
         .btn { flex: 1; padding: 16px; border-radius: 18px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); box-shadow: 0 8px 20px rgba(77,182,172,0.3); }
         .btn-secondary { background: #5856D6; flex: 0.3; }
         
         #forceReset { position: fixed; bottom: 5px; right: 5px; z-index: 9999; background: #FF5252; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; opacity: 0.5; }
+        .packing-category { font-size: 11px; font-weight: 800; color: var(--primary); margin: 20px 15px 5px 15px; border-left: 3px solid var(--primary); padding-left: 8px; }
         .chip { display: inline-block; padding: 5px 12px; background: var(--bg); border-radius: 15px; font-size: 11px; margin: 3px; cursor: pointer; }
         .chip.active { background: var(--primary-light); color: var(--primary); font-weight: bold; border: 1px solid var(--primary); }
 
-        /* 4. PDF Calendar 佈局樣式 */
         @media print {
-            .header, .footer, #forceReset, .nav-switch, .fa-location-arrow, .btn-transit { display: none !important; }
-            body { background: white; padding: 0; }
-            .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; margin: 10px 0 !important; width: 100% !important; }
+            .header, .footer, #forceReset, .nav-switch { display: none !important; }
+            .card { box-shadow: none !important; border: 1px solid #eee !important; break-inside: avoid; }
             .handle { display: none !important; }
-            .day-tabs-wrapper { display: block !important; border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
-            .print-day-header { display: block !important; font-size: 20px; font-weight: bold; color: var(--primary); margin: 30px 0 10px 0; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
         }
-        .print-day-header { display: none; }
     </style>
 </head>
 <body>
 
-<button id="forceReset" onclick="if(confirm('確定清除所有數據？')){localStorage.clear(); window.location.reload();}">⚠️ 強制重設</button>
+<button id="forceReset" onclick="if(confirm('確定清除？數據將消失')){localStorage.clear(); window.location.reload();}">⚠️ 強制重設</button>
 
 <div id="app" v-cloak>
     <div v-if="!isInitialized" class="wizard-overlay">
         <div class="wizard-content">
-            <i class="fa-solid fa-earth-asia" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
-            <h2>開始規劃旅程</h2>
-            
-            <span class="wizard-label">目的地城市</span>
+            <i class="fa-solid fa-plane-up" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
+            <h2>Travel Master Pro v57</h2>
+            <span class="wizard-label">目的地</span>
             <input v-model="config.dest" class="wizard-input" placeholder="例如: Tokyo">
-            
             <span class="wizard-label">出發日期</span>
             <input type="date" v-model="config.startDate" class="wizard-input">
-            
             <span class="wizard-label">回程日期</span>
             <input type="date" v-model="config.endDate" class="wizard-input">
-            
             <button class="wizard-btn" @click="finishWizard">生成我的行程表</button>
         </div>
     </div>
@@ -112,28 +107,18 @@
         <div class="card" style="padding: 15px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div v-if="days[currentDayIdx]">
-                    <label style="font-size: 10px;">☀️ 當地天氣</label>
-                    <div style="font-weight:700; font-size:14px;">{{ weather.temp }}°C | 
-                        <input type="time" v-model="days[currentDayIdx].startTime" @change="autoReschedule" style="border:none; background:none; font-weight:700; color:var(--primary); width:75px; outline:none;">
-                    </div>
+                    <label style="font-size: 10px;">☀️ {{ weather.temp }}°C</label>
+                    <div style="font-weight:700;"><input type="time" v-model="days[currentDayIdx].startTime" @change="autoReschedule" style="border:none; background:none; font-weight:700; color:var(--primary); font-size:14px; width:75px; outline:none;"></div>
                 </div>
                 <div style="text-align: right;">
-                    <label style="font-size: 10px;">今日總支出</label>
+                    <label style="font-size: 10px;">今日總計</label>
                     <div style="font-weight:700; color:var(--accent);">HKD ${{ dailyTotalHKD }}</div>
                 </div>
             </div>
         </div>
 
-        <div style="padding-bottom: 80px;">
-            <div class="print-day-header">Day {{ currentDayIdx+1 }} - {{ getDayDate(currentDayIdx) }}</div>
-            
-            <v-draggable 
-                :list="computedEvents" 
-                item-key="id" 
-                handle=".handle" 
-                @end="onDragEnd"
-                :animation="200"
-            >
+        <div style="padding-bottom: 100px;">
+            <v-draggable :list="computedEvents" item-key="id" handle=".handle" @end="onDragEnd" :animation="200">
                 <template #item="{element, index}">
                     <div>
                         <div class="card event-card">
@@ -142,22 +127,21 @@
                             </div>
                             <div class="handle"><i :class="getCatIcon(element.category)"></i></div>
                             <div class="card-main" @click="openEdit(index)">
-                                <span class="card-title">{{ element.title || '新項目' }}</span>
+                                <span class="card-title">{{ element.title || '新行程' }}</span>
                                 <div class="card-meta">
                                     <span style="color:var(--primary); font-weight:800;">{{ element.time }}</span>
                                     <span v-if="element.cost > 0" style="color:var(--accent);">💰 ${{ safeConvertToHKD(element.cost, element.currency) }}</span>
                                 </div>
-                                <div class="info-box" v-if="element.note || element.url || element.phone">
+                                <div class="info-box" v-if="element.note || element.url">
                                     <div v-if="element.note">{{ element.note }}</div>
-                                    <div v-if="element.url" style="color:var(--primary); font-weight:bold; font-size:11px;">🌐 查看網址</div>
-                                    <div v-if="element.phone">📞 {{ element.phone }}</div>
+                                    <a v-if="element.url" :href="element.url" target="_blank" class="card-link" @click.stop><i class="fa-solid fa-link"></i> 開啟網址</a>
                                 </div>
                             </div>
                             <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(element.title || '')" target="_blank" style="color:var(--primary); padding:10px;"><i class="fa-solid fa-location-arrow"></i></a>
                         </div>
-                        <div v-if="index < computedEvents.length - 1" class="transport-divider">
+                        <div v-if="index < computedEvents.length - 1" style="margin: -5px 0 12px 65px; border-left: 2px dashed var(--primary-light); padding: 5px 15px; font-size: 11px; color: var(--secondary); display: flex; align-items: center; gap: 10px;">
                             <span>{{ element.transTime || 0 }}m 交通</span>
-                            <a :href="'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(computedEvents[index].title) + '&destination=' + encodeURIComponent(computedEvents[index+1].title) + '&travelmode=transit'" target="_blank" class="btn-transit">🔍 估算</a>
+                            <a :href="'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(computedEvents[index].title) + '&destination=' + encodeURIComponent(computedEvents[index+1].title) + '&travelmode=transit'" target="_blank" style="color:var(--primary); font-weight:bold; text-decoration:none;">🔍 估算</a>
                         </div>
                     </div>
                 </template>
@@ -170,12 +154,12 @@
             <div style="font-size: 12px; opacity: 0.8;">預算總支出</div>
             <div style="font-size: 32px; font-weight: 800;">HKD ${{ grandTotalHKD }}</div>
         </div>
-        <div v-for="(day, idx) in days" :key="'cost-'+idx" v-if="hasValidExpenses(idx)">
-            <h4 style="margin: 20px 0 5px 15px;">Day {{ idx + 1 }} 明細</h4>
-            <div v-for="ev in day.events" :key="ev.id">
-                <div v-if="parseFloat(ev.cost || 0) > 0" class="card" style="padding: 12px; margin-bottom: 5px; display:flex; justify-content:space-between; font-size: 13px;">
+        <div v-for="(day, idx) in days" :key="'cost-day-'+idx" v-if="hasValidExpenses(idx)">
+            <h4 style="margin: 20px 0 5px 15px;">Day {{ idx + 1 }} 支出明細</h4>
+            <div v-for="ev in day.events" :key="'ev-'+ev.id">
+                <div v-if="parseFloat(ev.cost || 0) > 0" class="card" style="padding:15px; margin-bottom: 5px; display:flex; justify-content:space-between; font-size: 14px;">
                     <span>{{ ev.title }} ({{ ev.paidBy }})</span>
-                    <span style="font-weight:bold;">${{ safeConvertToHKD(ev.cost, ev.currency) }}</span>
+                    <span style="font-weight:bold; color:var(--accent);">${{ safeConvertToHKD(ev.cost, ev.currency) }}</span>
                 </div>
             </div>
         </div>
@@ -189,32 +173,49 @@
                 <i class="fa-solid fa-circle-xmark" @click="removeMember(i)" style="color:#FFAB91; cursor:pointer;" v-if="m !== '我'"></i>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px;">
-                <input v-model="newMemberName" placeholder="輸入成員名字" style="margin:0;">
+                <input v-model="newMemberName" placeholder="成員名字" style="margin:0;">
                 <button @click="addMember" style="background:var(--primary); color:white; border:none; padding:0 20px; border-radius:12px; font-weight:bold;">＋</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="view === 'pack'" style="padding: 15px;">
+        <div v-for="(group, catName) in groupedPacking" :key="catName">
+            <div class="packing-category">{{ catName }}</div>
+            <div v-for="item in group" :key="item.id" class="card" style="padding:15px; margin-bottom:10px; display:flex; align-items:center;">
+                <i @click="togglePacking(item)" :class="item.done ? 'fa-solid fa-square-check' : 'fa-regular fa-square'" :style="{color: item.done ? 'var(--primary)' : '#CFD8DC', fontSize:'24px', marginRight:'15px'}"></i>
+                <span :style="{flex:1, textDecoration: item.done ? 'line-through' : 'none'}">{{ item.text }}</span>
+                <i class="fa-solid fa-trash" @click="removePackingItem(item.id)" style="color:#FFAB91; opacity:0.6;"></i>
             </div>
         </div>
     </div>
 
     <div class="footer" v-if="isInitialized">
         <button class="btn btn-primary" @click="openAdd">＋ 新增行程 / 項目</button>
-        <button class="btn btn-secondary" @click="exportPDF"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-secondary" @click="exportPDF"><i class="fa-solid fa-file-pdf"></i></button>
     </div>
 
     <div v-if="showModal" class="modal" @click.self="showModal = false">
         <div class="modal-body">
             <h3>行程詳情</h3>
-            <input v-model="form.title" placeholder="項目名稱">
+            <div class="icon-grid">
+                <div v-for="c in categories" :key="c.id" class="icon-opt" :class="{ 'selected': form.category === c.id }" @click="form.category = c.id"><i :class="c.icon"></i></div>
+            </div>
+            <input v-model="form.title" placeholder="景點名稱">
             <div style="display:flex; gap:10px;">
                 <div style="flex:1"><label style="font-size:10px;">時間</label><input type="time" v-model="form.time"></div>
                 <div style="flex:1"><label style="font-size:10px;">停留(分)</label><input type="number" v-model="form.duration"></div>
             </div>
             <label style="font-size:10px;">交通至下站 (分鐘)</label>
             <input type="number" v-model="form.transTime">
-            <input v-model="form.url" placeholder="連結">
+            <input v-model="form.url" placeholder="連結 (可按網址)">
             <textarea v-model="form.note" placeholder="詳細備註..."></textarea>
             <div style="background:var(--bg); padding:15px; border-radius:15px;">
-                <small>付款人：</small><select v-model="form.paidBy" style="padding:5px;"><option v-for="m in members" :value="m">{{m}}</option></select>
-                <div style="margin-top:10px;"><small>金額幣別：</small></div>
+                <small>付款人：</small>
+                <select v-model="form.paidBy" style="padding:5px; width:100%;">
+                    <option v-for="m in members" :key="m" :value="m">{{m}}</option>
+                </select>
+                <div style="margin-top:10px;"><small>金額：</small></div>
                 <div style="display:flex; gap:8px;">
                     <input type="number" v-model="form.cost" style="flex:1; margin:0;" placeholder="金額">
                     <select v-model="form.currency" style="flex:1; margin:0;"><option v-for="(n, c) in currencyNames" :value="c">{{n}}</option></select>
@@ -242,11 +243,19 @@
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getDatabase(fbApp);
-    const planRef = ref(db, 'master_v56_itinerary'); 
-    const configRef = ref(db, 'config_v56');
-    const memberRef = ref(db, 'members_v56');
+    const planRef = ref(db, 'master_v57_ultra_plan'); 
+    const configRef = ref(db, 'config_v57_ultra');
+    const memberRef = ref(db, 'members_v57_ultra');
+    const packRef = ref(db, 'packing_v57_ultra');
 
-    const { createApp, ref: vRef, onMounted, computed, watch, nextTick } = Vue;
+    const { createApp, ref: vRef, onMounted, computed, watch, triggerRef } = Vue;
+
+    const PRELOADED_PACKING = [
+        { cat: "重要文件與財物", items: ["錢包", "信用卡", "身分證", "護照", "行程表", "保險單", "SIM卡"] },
+        { cat: "電子與攝影", items: ["FIMI 相機", "Insta360", "航拍機", "手機充電器", "行動電源", "萬用插頭"] },
+        { cat: "沐浴護理", items: ["浴巾", "牙膏牙刷", "護膚品", "風筒"] },
+        { cat: "衣物穿戴", items: ["外套", "褲子", "內衣褲", "襪子", "睡衣"] }
+    ];
 
     createApp({
         components: { 'v-draggable': window.vuedraggable },
@@ -256,12 +265,21 @@
             const days = vRef([]);
             const config = vRef({ dest: '', startDate: '', endDate: '', currency: 'HKD' });
             const members = vRef(['我']);
+            const packingList = vRef([]);
             const currentDayIdx = vRef(0);
             const showModal = vRef(false);
             const editingIdx = vRef(null);
             const weather = vRef({ temp: '--' });
-            const rates = vRef({ "HKD":1, "JPY":19.3, "TWD":4.1, "USD":7.8 }); 
-            const currencyNames = { "HKD":"港幣","JPY":"日圓","TWD":"台幣","USD":"美金" };
+            const rates = vRef({ "HKD":1, "JPY":19.3, "USD":7.8, "TWD":4.1 }); 
+            const currencyNames = { "HKD":"港幣","JPY":"日圓","USD":"美金","TWD":"台幣" };
+            const categories = [
+                { id:'attraction', icon:'fa-solid fa-camera' },
+                { id:'food', icon:'fa-solid fa-utensils' },
+                { id:'hotel', icon:'fa-solid fa-hotel' },
+                { id:'flight', icon:'fa-solid fa-plane' },
+                { id:'shopping', icon:'fa-solid fa-bag-shopping' },
+                { id:'transport', icon:'fa-solid fa-train' }
+            ];
             const form = vRef({});
             const newMemberName = vRef('');
 
@@ -274,25 +292,26 @@
                         days.value = rawArr.map(d => ({ ...d, events: d.events ? (Array.isArray(d.events) ? d.events : Object.values(d.events)) : [] }));
                     }
                 });
-                onValue(memberRef, snap => { if(snap.val()) members.value = Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val()); });
+                onValue(memberRef, snap => { if(snap.val()) members.value = snap.val(); });
+                onValue(packRef, snap => { if(snap.val()) packingList.value = snap.val(); });
                 fetch('https://open.er-api.com/v6/latest/HKD').then(r => r.json()).then(d => rates.value = d.rates);
                 fetchWeather();
             });
 
-            const computedEvents = computed(() => {
-                if (!days.value[currentDayIdx.value]) return [];
-                const evs = days.value[currentDayIdx.value].events;
-                return Array.isArray(evs) ? evs : Object.values(evs || {});
+            const computedEvents = computed({
+                get: () => days.value[currentDayIdx.value]?.events || [],
+                set: (val) => { if(days.value[currentDayIdx.value]) days.value[currentDayIdx.value].events = val; }
             });
 
             const finishWizard = () => {
-                if(!config.value.dest || !config.value.startDate) return alert("請填寫城市與日期");
+                if(!config.value.dest || !config.value.startDate) return alert("請填寫資訊");
                 const start = new Date(config.value.startDate);
                 const end = new Date(config.value.endDate || config.value.startDate);
                 const diffDays = Math.ceil(Math.abs(end - start) / 86400000) + 1;
                 const newDays = Array.from({length: diffDays}, (_, i) => ({ events: [], city: config.value.dest, startTime: '07:00', id: Date.now() + i }));
-                days.value = newDays;
-                set(configRef, config.value); set(planRef, newDays); set(memberRef, members.value);
+                const prePack = []; PRELOADED_PACKING.forEach(g => g.items.forEach(it => prePack.push({ id: Math.random(), category: g.cat, text: it, done: false })));
+                days.value = newDays; packingList.value = prePack;
+                set(configRef, config.value); set(planRef, newDays); set(memberRef, members.value); set(packRef, prePack);
                 isInitialized.value = true;
             };
 
@@ -315,17 +334,17 @@
                 } catch(e) { weather.value.temp = '--'; }
             };
 
-            watch(currentDayIdx, fetchWeather);
-
             return { 
-                isInitialized, config, days, currentDayIdx, view, members, weather, showModal, editingIdx, form, currencyNames, newMemberName, computedEvents,
+                isInitialized, config, days, currentDayIdx, view, members, weather, showModal, editingIdx, form, currencyNames, categories, computedEvents, packingList, newMemberName,
                 finishWizard, autoReschedule, save, 
                 getDayDate: (i) => { if (!config.value.startDate) return ''; let d = new Date(config.value.startDate); d.setDate(d.getDate() + i); return `${d.getDate()}/${d.getMonth() + 1}`; },
                 openAdd: () => {
                     const d = days.value[currentDayIdx.value];
                     let t = d ? d.startTime : '07:00';
-                    const evs = computedEvents.value;
-                    if(evs.length > 0) { t = addMinutes(evs[evs.length-1].time, (parseInt(evs[evs.length-1].duration)||0)+(parseInt(evs[evs.length-1].transTime)||0)); }
+                    if(computedEvents.value.length > 0) {
+                        const last = computedEvents.value[computedEvents.value.length-1];
+                        t = addMinutes(last.time, (parseInt(last.duration)||0)+(parseInt(last.transTime)||0));
+                    }
                     form.value = { title:'', time:t, duration:60, transTime:0, category:'attraction', cost:0, currency:'HKD', note:'', url:'', paidBy:members.value[0], id: Date.now() + Math.random() };
                     showModal.value = true;
                 },
@@ -340,21 +359,24 @@
                     days.value = allDays;
                     showModal.value = false; autoReschedule();
                 },
-                onDragEnd: () => { autoReschedule(); },
                 openEdit: (i) => { editingIdx.value = i; form.value = JSON.parse(JSON.stringify(computedEvents.value[i])); showModal.value = true; },
                 deleteEvent: () => { days.value[currentDayIdx.value].events.splice(editingIdx.value,1); autoReschedule(); showModal.value=false; },
+                onDragEnd: () => { autoReschedule(); },
                 addMember: () => { if(newMemberName.value) { members.value.push(newMemberName.value); newMemberName.value=''; set(memberRef, members.value); }},
                 removeMember: (i) => { members.value.splice(i,1); set(memberRef, members.value); },
-                getCatIcon: (id) => ({attraction:'fa-camera', food:'fa-utensils', hotel:'fa-hotel', transport:'fa-train'}[id] || 'fa-map-pin'),
+                togglePacking: (it) => { it.done = !it.done; set(packRef, packingList.value); },
+                removePackingItem: (id) => { packingList.value = packingList.value.filter(x=>x.id!==id); set(packRef, packingList.value); },
+                getCatIcon: (id) => { const c = categories.find(x => x.id === id); return c ? c.icon : 'fa-solid fa-map-pin'; },
                 safeConvertToHKD: (amt, cur) => (parseFloat(amt || 0) / (rates.value[cur] || 1)).toFixed(1),
                 dailyTotalHKD: computed(() => computedEvents.value.reduce((s, e) => s + (parseFloat(e.cost || 0) / (rates.value[e.currency] || 1)), 0).toFixed(0)),
                 grandTotalHKD: computed(() => days.value.reduce((total, day) => {
                     const evs = Array.isArray(day.events) ? day.events : Object.values(day.events || {});
                     return total + evs.reduce((s, e) => s + (parseFloat(e.cost || 0) / (rates.value[e.currency] || 1)), 0);
                 }, 0).toFixed(0)),
-                hasValidExpenses: (idx) => (Array.isArray(days.value[idx]?.events) ? days.value[idx].events : []).some(e => parseFloat(e.cost||0) > 0),
+                groupedPacking: computed(() => { const g = {}; packingList.value.forEach(it => { if(!g[it.category]) g[it.category] = []; g[it.category].push(it); }); return g; }),
+                hasValidExpenses: (idx) => (days.value[idx]?.events || []).some(e => parseFloat(e.cost||0) > 0),
                 exportPDF: () => window.print(),
-                resetConfig: () => { if(confirm("確定重設？資料將清除")) { localStorage.clear(); set(configRef, null); location.reload(); } }
+                resetConfig: () => { if(confirm("確定重設？")) { localStorage.clear(); set(configRef, null); location.reload(); } }
             };
         }
     }).mount('#app');
